@@ -114,7 +114,7 @@ export const useChessGame = () => {
     setGameState(prev => ({ ...prev, lastMoveTime: Date.now() }));
     // Start timer immediately when joker reveal is complete
     startGameTimer();
-  }, []);
+  }, [startGameTimer]);
 
   const pauseGame = useCallback(() => {
     setIsPaused(true);
@@ -369,8 +369,7 @@ export const useChessGame = () => {
     };
     
     localStorage.setItem(`chess_game_${filename}`, JSON.stringify(gameData));
-  }
-  )
+  }, [gameState, players]);
 
   const loadGame = useCallback((filename: string) => {
     const savedData = localStorage.getItem(`chess_game_${filename}`);
@@ -426,7 +425,7 @@ export const useChessGame = () => {
     setShowPossibleMoves,
     saveGame,
     loadGame,
-    getSavedGames
+    getSavedGames,
     gameEndReason,
     setGameEndReason
   };
