@@ -11,7 +11,7 @@ import { ConfirmationModal } from './components/ConfirmationModal';
 import { SaveGameModal } from './components/SaveGameModal';
 import { useChessGame } from './hooks/useChessGame';
 import { getTheme } from './styles/themes';
-import { HelpCircle, Home, Settings, RotateCcw, RotateRight, Flag, HandHeart } from 'lucide-react';
+import { HelpCircle, Home, Settings, RotateCcw, Rotate3D as RotateRight, Flag, HandHeart } from 'lucide-react';
 import { PlayerInfo } from './components/PlayerInfo';
 import { PieceType } from './types/chess';
 
