@@ -369,6 +369,7 @@ export const useChessGame = () => {
     };
     
     localStorage.setItem(`chess_game_${filename}`, JSON.stringify(gameData));
+  }, [gameState, players, moveHistory, currentMoveIndex]);
   }, [gameState, players]);
 
   const loadGame = useCallback((filename: string) => {

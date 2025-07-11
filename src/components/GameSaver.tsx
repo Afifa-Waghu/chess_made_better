@@ -39,8 +39,12 @@ export const GameSaver: React.FC<GameSaverProps> = ({
   };
 
   const handleLoad = (filename: string) => {
-    onLoad(filename);
-    closeModal();
+    try {
+      onLoad(filename);
+      closeModal();
+    } catch (error) {
+      alert('Failed to load game. The save file might be corrupted.');
+    }
   };
 
   const handleDelete = (filename: string) => {
