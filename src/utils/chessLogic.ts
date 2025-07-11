@@ -210,28 +210,6 @@ const isPathClear = (from: Square, to: Square, board: Map<Square, ChessPiece>): 
   return true;
 };
 
-export const isInCheck = (color: PieceColor, board: Map<Square, ChessPiece>): boolean => {
-  // Find king
-  let kingSquare: Square | null = null;
-  for (const [square, piece] of board.entries()) {
-    if (piece.type === 'king' && piece.color === color) {
-      kingSquare = square;
-      break;
-    }
-  }
-  
-  if (!kingSquare) return false;
-  
-  // Check if any opponent piece can attack the king
-  for (const [square, piece] of board.entries()) {
-    if (piece.color !== color && isValidMove(square, kingSquare, board)) {
-      return true;
-    }
-  }
-  
-  return false;
-};
-
 export const isCheckmate = (color: PieceColor, board: Map<Square, ChessPiece>): boolean => {
   if (!isInCheck(color, board)) return false;
   
