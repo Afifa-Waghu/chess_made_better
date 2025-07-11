@@ -102,8 +102,9 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, onOpen })
             </p>
             <ul className="text-yellow-600 text-sm space-y-1 ml-4">
               <li>• Choose to promote it to Queen, Rook, Bishop, or Knight</li>
-              <li>• If a joker pawn is promoted, it loses its special joker status</li>
-              <li>• Capturing a promoted joker pawn is safe - you won't lose!</li>
+              <li>• If a joker pawn is promoted, it loses its special joker status permanently</li>
+              <li>• A promoted joker pawn acts as the new piece and has no special properties</li>
+              <li>• Capturing a promoted joker pawn is completely safe - you won't lose!</li>
             </ul>
           </div>
 

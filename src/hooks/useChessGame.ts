@@ -29,6 +29,7 @@ export const useChessGame = () => {
   const [currentMoveIndex, setCurrentMoveIndex] = useState(-1);
   const [pendingPromotion, setPendingPromotion] = useState<{from: Square, to: Square} | null>(null);
   const [drawOffer, setDrawOffer] = useState<{from: PieceColor} | null>(null);
+  const [gameEndReason, setGameEndReason] = useState<'checkmate' | 'timeout' | 'joker' | 'resignation' | 'draw' | 'stalemate' | null>(null);
 
   const startGame = useCallback((whitePlayer: PlayerInfo, blackPlayer: PlayerInfo, timeControl: TimeControl) => {
     const board = getInitialBoard();
@@ -159,6 +160,7 @@ export const useChessGame = () => {
 
   const resign = useCallback(() => {
     const winner = gameState.currentPlayer === 'white' ? 'black' : 'white';
+    setGameEndReason('resignation');
     setGameState(prev => ({
       ...prev,
       gameStatus: 'ended',
@@ -254,6 +256,7 @@ export const useChessGame = () => {
       // Check if capturing joker pawn
       if (capturedPiece?.isJoker) {
         // Capturing player loses immediately
+        setGameEndReason('joker');
         if (gameTimer) clearInterval(gameTimer);
         return {
           ...prev,

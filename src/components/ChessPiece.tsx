@@ -55,8 +55,8 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
   const isJokerPawn = piece.type === 'pawn' && piece.isJoker;
   const showJokerEffect = isJokerPawn && isJokerRevealed;
 
-  // Make white pieces lighter and black pieces darker
-  const pieceColor = piece.color === 'white' ? '#f8f9fa' : '#343a40';
+  // Make white pieces white and black pieces lighter gray for better contrast
+  const pieceColor = piece.color === 'white' ? '#ffffff' : '#6b7280';
   const shadowColor = piece.color === 'white' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)';
   const bgColor = piece.color === 'white' ? theme.boardLight : theme.boardDark;
 

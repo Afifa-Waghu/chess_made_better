@@ -275,6 +275,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
             const isDragOver = dragOverSquare === square;
             const isPossibleMove = possibleMoves.includes(square);
             const isInvalidMove = invalidMoveSquare === square;
+            const isKingInCheckSquare = kingInCheck === square;
             const actualRank = 7 - rankIndex;
             const isDragging = draggedPiece?.square === square;
             
@@ -291,10 +292,11 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                   ${isSelected ? 'ring-4 ring-yellow-400 ring-inset z-10' : ''}
                   ${isDragOver ? 'ring-4 ring-green-400 ring-inset' : ''}
                   ${isInvalidMove ? 'animate-pulse bg-red-400' : ''}
+                  ${isKingInCheckSquare ? 'bg-red-200' : ''}
                   hover:brightness-110
                 `}
                 style={{ 
-                  backgroundColor: getSquareColor(fileIndex, actualRank),
+                  backgroundColor: isKingInCheckSquare ? '#fecaca' : getSquareColor(fileIndex, actualRank),
                   boxShadow: isDragOver ? 'inset 0 0 20px rgba(34, 197, 94, 0.3)' : undefined
                 }}
               >

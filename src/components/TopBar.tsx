@@ -115,18 +115,6 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Right Side - Game Actions */}
         <div className="flex gap-2">
           <button
-            onClick={isPaused ? onResume : onPause}
-            className="text-white px-3 py-2 rounded-xl transition-colors flex items-center gap-2"
-            style={{ 
-              backgroundColor: theme.secondary,
-              boxShadow: `0 4px 12px ${theme.secondary}40`
-            }}
-          >
-            {isPaused ? <Play size={16} /> : <Pause size={16} />}
-            {isPaused ? 'Resume' : 'Pause'}
-          </button>
-          
-          <button
             onClick={() => setShowHelp(true)}
             className="text-white px-3 py-2 rounded-xl transition-colors flex items-center gap-2"
             style={{ 

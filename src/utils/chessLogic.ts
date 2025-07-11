@@ -1,5 +1,27 @@
 import { PieceType, PieceColor, Square, ChessPiece, GameState } from '../types/chess';
 
+export const isInCheck = (color: PieceColor, board: Map<Square, ChessPiece>): boolean => {
+  // Find king
+  let kingSquare: Square | null = null;
+  for (const [square, piece] of board.entries()) {
+    if (piece.type === 'king' && piece.color === color) {
+      kingSquare = square;
+      break;
+    }
+  }
+  
+  if (!kingSquare) return false;
+  
+  // Check if any opponent piece can attack the king
+  for (const [square, piece] of board.entries()) {
+    if (piece.color !== color && isValidMove(square, kingSquare, board)) {
+      return true;
+    }
+  }
+  
+  return false;
+};
+
 export const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 export const RANKS = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
