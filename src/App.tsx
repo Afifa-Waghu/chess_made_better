@@ -199,18 +199,3 @@ function App() {
 }
 
 export default App;
-      />
-
-      {showGameEnd && gameState.winner && (
-        <GameEndModal
-          winner={gameState.winner}
-          reason="checkmate"
-          onNewGame={handleNewGame}
-          winnerName={gameState.winner === 'white' ? players.white.name : players.black.name}
-        />
-      )}
-    </div>
-  );
-}
-
-export default App;
