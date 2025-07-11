@@ -426,5 +426,7 @@ export const useChessGame = () => {
     saveGame,
     loadGame,
     getSavedGames
+    gameEndReason,
+    setGameEndReason
   };
 };
