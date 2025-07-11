@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { GameSetup } from './components/GameSetup';
 import { ChessBoard } from './components/ChessBoard';
-import { PlayerClock } from './components/PlayerClock';
-import { CapturedPieces } from './components/CapturedPieces';
-import { HelpModal } from './components/HelpModal';
 import { JokerReveal } from './components/JokerReveal';
 import { GameSaver } from './components/GameSaver';
 import { GameEndModal } from './components/GameEndModal';
+import { TopBar } from './components/TopBar';
+import { PawnPromotionModal } from './components/PawnPromotionModal';
+import { DrawOfferModal } from './components/DrawOfferModal';
 import { useChessGame } from './hooks/useChessGame';
 import { getTheme } from './styles/themes';
-import { HelpCircle, Home } from 'lucide-react';
 import { PlayerInfo } from './components/PlayerInfo';
 
 function App() {
@@ -18,22 +17,34 @@ function App() {
     players,
     selectedSquare,
     jokerRevealComplete,
+    isPaused,
+    showPossibleMoves,
+    pendingPromotion,
+    drawOffer,
     handleJokerRevealComplete,
     startGame,
     makeMove,
     selectSquare,
+    pauseGame,
+    resumeGame,
+    undoMove,
+    redoMove,
+    canUndo,
+    canRedo,
+    offerDraw,
+    acceptDraw,
+    declineDraw,
+    resign,
+    promotePawn,
+    getPossibleMoves,
+    setShowPossibleMoves,
     saveGame,
     loadGame,
     getSavedGames
   } = useChessGame();
 
-  const [showHelp, setShowHelp] = useState(false);
   const [showGameEnd, setShowGameEnd] = useState(false);
   const [globalTheme, setGlobalTheme] = useState('Princess Pink');
-
-  const handleNewGame = () => {
-    window.location.reload();
-  };
 
   const handleStartGame = (whitePlayer: any, blackPlayer: any, timeControl: any, theme: string) => {
     setGlobalTheme(theme);
@@ -45,6 +56,9 @@ function App() {
       setShowGameEnd(true);
     }
   }, [gameState.gameStatus, showGameEnd]);
+
+  const possibleMoves = selectedSquare ? getPossibleMoves(selectedSquare) : [];
+  const currentPlayerName = gameState.currentPlayer === 'white' ? players.white.name : players.black.name;
 
   if (gameState.gameStatus === 'setup') {
     return <GameSetup onStartGame={handleStartGame} />;
@@ -69,46 +83,22 @@ function App() {
           border: `2px solid ${theme.border}40`
         }}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 
-            className="text-3xl font-bold flex items-center gap-2"
-            style={{ color: theme.primary }}
-          >
-            ✨ Chess Made Better ✨
-          </h1>
-          <div className="flex gap-2">
-            <GameSaver
-              onSave={saveGame}
-              onLoad={loadGame}
-              getSavedGames={getSavedGames}
-              player1Name={players.white.name}
-              player2Name={players.black.name}
-            />
-            <button
-              onClick={() => setShowHelp(true)}
-              className="text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
-              style={{ 
-                backgroundColor: theme.accent,
-                boxShadow: `0 4px 12px ${theme.accent}40`
-              }}
-            >
-              <HelpCircle size={16} />
-              Help
-            </button>
-            <button
-              onClick={handleNewGame}
-              className="text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
-              style={{ 
-                backgroundColor: theme.primary,
-                boxShadow: `0 4px 12px ${theme.primary}40`
-              }}
-            >
-              <Home size={16} />
-              New Game
-            </button>
-          </div>
-        </div>
+        {/* Top Bar */}
+        <TopBar
+          onUndo={undoMove}
+          onRedo={redoMove}
+          onResign={resign}
+          onOfferDraw={offerDraw}
+          onPause={pauseGame}
+          onResume={resumeGame}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          isPaused={isPaused}
+          showPossibleMoves={showPossibleMoves}
+          onTogglePossibleMoves={setShowPossibleMoves}
+          currentPlayerName={currentPlayerName}
+          theme={theme}
+        />
 
         {/* Game Layout */}
         <div className="flex flex-col items-center gap-4">
@@ -136,6 +126,8 @@ function App() {
               }}
               jokerRevealComplete={jokerRevealComplete}
               globalTheme={globalTheme}
+              possibleMoves={possibleMoves}
+              isPaused={isPaused}
             />
           </div>
 
@@ -151,22 +143,15 @@ function App() {
           />
         </div>
 
-        {/* Game Status */}
-        <div className="mt-6 text-center">
-          <div 
-            className="backdrop-blur-sm rounded-2xl p-4 border-2 inline-block"
-            style={{ 
-              backgroundColor: `${theme.background}80`,
-              borderColor: theme.border
-            }}
-          >
-            <p className="font-semibold" style={{ color: theme.text }}>
-              {gameState.gameStatus === 'playing' ? 
-                `${gameState.currentPlayer === 'white' ? players.white.name : players.black.name}'s turn` :
-                'Game Over'
-              }
-            </p>
-          </div>
+        {/* Save/Load Button */}
+        <div className="mt-4 text-center">
+          <GameSaver
+            onSave={saveGame}
+            onLoad={loadGame}
+            getSavedGames={getSavedGames}
+            player1Name={players.white.name}
+            player2Name={players.black.name}
+          />
         </div>
       </div>
 
@@ -178,9 +163,42 @@ function App() {
         />
       )}
 
-      <HelpModal
-        isOpen={showHelp}
-        onClose={() => setShowHelp(false)}
+      {/* Pawn Promotion Modal */}
+      <PawnPromotionModal
+        isOpen={!!pendingPromotion}
+        onPromote={promotePawn}
+        color={gameState.currentPlayer}
+        theme={theme}
+      />
+
+      {/* Draw Offer Modal */}
+      {drawOffer && (
+        <DrawOfferModal
+          isOpen={true}
+          onAccept={acceptDraw}
+          onDecline={declineDraw}
+          offeringPlayerName={drawOffer.from === 'white' ? players.white.name : players.black.name}
+          theme={theme}
+        />
+      )}
+
+      {/* Game End Modal */}
+      {showGameEnd && (
+        <GameEndModal
+          winner={gameState.winner}
+          reason={
+            gameState.winner === undefined ? 'draw' :
+            gameState.gameStatus === 'ended' ? 'checkmate' : 'timeout'
+          }
+          onNewGame={() => window.location.reload()}
+          winnerName={gameState.winner ? (gameState.winner === 'white' ? players.white.name : players.black.name) : 'Draw'}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
       />
 
       {showGameEnd && gameState.winner && (

@@ -263,3 +263,36 @@ export const getTimeBonus = (capturedPiece: ChessPiece): number => {
     default: return 0;
   }
 };
+
+export const isStalemate = (color: PieceColor, board: Map<Square, ChessPiece>): boolean => {
+  if (isInCheck(color, board)) return false; // Can't be stalemate if in check
+  
+  // Check if player has any legal moves
+  for (const [fromSquare, piece] of board.entries()) {
+    if (piece.color !== color) continue;
+    
+    // Try all possible destination squares
+    for (let file = 0; file < 8; file++) {
+      for (let rank = 0; rank < 8; rank++) {
+        const toSquare = squareToString(file, rank);
+        
+        if (isValidMove(fromSquare, toSquare, board)) {
+          return false; // Found a legal move, not stalemate
+        }
+      }
+    }
+  }
+  
+  return true; // No legal moves found, it's stalemate
+};
+
+export const needsPromotion = (piece: ChessPiece, toSquare: Square): boolean => {
+  if (piece.type !== 'pawn') return false;
+  
+  const [, toRank] = parseSquare(toSquare);
+  
+  if (piece.color === 'white' && toRank === 7) return true;
+  if (piece.color === 'black' && toRank === 0) return true;
+  
+  return false;
+};
