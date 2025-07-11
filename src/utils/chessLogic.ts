@@ -1,27 +1,5 @@
 import { PieceType, PieceColor, Square, ChessPiece, GameState } from '../types/chess';
 
-export const isInCheck = (color: PieceColor, board: Map<Square, ChessPiece>): boolean => {
-  // Find king
-  let kingSquare: Square | null = null;
-  for (const [square, piece] of board.entries()) {
-    if (piece.type === 'king' && piece.color === color) {
-      kingSquare = square;
-      break;
-    }
-  }
-  
-  if (!kingSquare) return false;
-  
-  // Check if any opponent piece can attack the king
-  for (const [square, piece] of board.entries()) {
-    if (piece.color !== color && isValidMove(square, kingSquare, board)) {
-      return true;
-    }
-  }
-  
-  return false;
-};
-
 export const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 export const RANKS = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
@@ -284,37 +262,4 @@ export const getTimeBonus = (capturedPiece: ChessPiece): number => {
     case 'queen': return 120;
     default: return 0;
   }
-};
-
-export const isStalemate = (color: PieceColor, board: Map<Square, ChessPiece>): boolean => {
-  if (isInCheck(color, board)) return false; // Can't be stalemate if in check
-  
-  // Check if player has any legal moves
-  for (const [fromSquare, piece] of board.entries()) {
-    if (piece.color !== color) continue;
-    
-    // Try all possible destination squares
-    for (let file = 0; file < 8; file++) {
-      for (let rank = 0; rank < 8; rank++) {
-        const toSquare = squareToString(file, rank);
-        
-        if (isValidMove(fromSquare, toSquare, board)) {
-          return false; // Found a legal move, not stalemate
-        }
-      }
-    }
-  }
-  
-  return true; // No legal moves found, it's stalemate
-};
-
-export const needsPromotion = (piece: ChessPiece, toSquare: Square): boolean => {
-  if (piece.type !== 'pawn') return false;
-  
-  const [, toRank] = parseSquare(toSquare);
-  
-  if (piece.color === 'white' && toRank === 7) return true;
-  if (piece.color === 'black' && toRank === 0) return true;
-  
-  return false;
 };

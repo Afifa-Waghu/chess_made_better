@@ -12,8 +12,6 @@ interface ChessBoardProps {
   playerThemes: { white: string; black: string };
   jokerRevealComplete: boolean;
   globalTheme: string;
-  possibleMoves: Square[];
-  isPaused: boolean;
 }
 
 export const ChessBoard: React.FC<ChessBoardProps> = ({
@@ -23,58 +21,13 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   onMove,
   playerThemes,
   jokerRevealComplete,
-  globalTheme,
-  possibleMoves,
-  isPaused
+  globalTheme
 }) => {
   const [draggedPiece, setDraggedPiece] = useState<{ square: Square; piece: any } | null>(null);
   const [dragOverSquare, setDragOverSquare] = useState<Square | null>(null);
   const [captureAnimation, setCaptureAnimation] = useState<string | null>(null);
-  const [invalidMoveSquare, setInvalidMoveSquare] = useState<Square | null>(null);
   
   const theme = getTheme(globalTheme);
-
-  const playCheckSound = () => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1);
-    oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.2);
-    
-    gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.2);
-  };
-
-  const playCheckmateSound = () => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.5);
-    
-    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
-  };
-
-  const showInvalidMove = (square: Square) => {
-    setInvalidMoveSquare(square);
-    setTimeout(() => setInvalidMoveSquare(null), 500);
-  };
 
   const playMoveSound = () => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -124,7 +77,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
 
   const handleDragStart = (square: Square) => (e: React.DragEvent) => {
     const piece = gameState.board.get(square);
-    if (piece && piece.color === gameState.currentPlayer && jokerRevealComplete && !isPaused) {
+    if (piece && piece.color === gameState.currentPlayer && jokerRevealComplete) {
       setDraggedPiece({ square, piece });
       e.dataTransfer.effectAllowed = 'move';
     } else {
@@ -151,30 +104,17 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     setDragOverSquare(null);
     
     if (draggedPiece && draggedPiece.square !== square) {
-      // Check if move is valid before playing sounds
-      const piece = gameState.board.get(draggedPiece.square);
-      if (piece && piece.color === gameState.currentPlayer) {
-        const targetPiece = gameState.board.get(square);
-        if (targetPiece) {
-          playCaptureSound();
-          triggerCaptureAnimation();
-        } else {
-          playMoveSound();
-        }
-        onMove(draggedPiece.square, square);
+      const targetPiece = gameState.board.get(square);
+      if (targetPiece) {
+        playCaptureSound();
+        triggerCaptureAnimation();
       } else {
-        showInvalidMove(square);
+        playMoveSound();
       }
+      onMove(draggedPiece.square, square);
     }
     setDraggedPiece(null);
   };
-
-  // Play check/checkmate sounds when game state changes
-  React.useEffect(() => {
-    if (gameState.gameStatus === 'ended' && gameState.winner) {
-      playCheckmateSound();
-    }
-  }, [gameState.gameStatus, gameState.winner]);
 
   const isLightSquare = (file: number, rank: number): boolean => {
     return (file + rank) % 2 === 0;
@@ -273,9 +213,6 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
             const piece = gameState.board.get(square);
             const isSelected = selectedSquare === square;
             const isDragOver = dragOverSquare === square;
-            const isPossibleMove = possibleMoves.includes(square);
-            const isInvalidMove = invalidMoveSquare === square;
-            const isKingInCheckSquare = kingInCheck === square;
             const actualRank = 7 - rankIndex;
             const isDragging = draggedPiece?.square === square;
             
@@ -291,35 +228,23 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                   transition-all duration-200 relative
                   ${isSelected ? 'ring-4 ring-yellow-400 ring-inset z-10' : ''}
                   ${isDragOver ? 'ring-4 ring-green-400 ring-inset' : ''}
-                  ${isInvalidMove ? 'animate-pulse bg-red-400' : ''}
-                  ${isKingInCheckSquare ? 'bg-red-200' : ''}
                   hover:brightness-110
                 `}
                 style={{ 
-                  backgroundColor: isKingInCheckSquare ? '#fecaca' : getSquareColor(fileIndex, actualRank),
+                  backgroundColor: getSquareColor(fileIndex, actualRank),
                   boxShadow: isDragOver ? 'inset 0 0 20px rgba(34, 197, 94, 0.3)' : undefined
                 }}
               >
-                {/* Possible Move Indicator */}
-                {isPossibleMove && (
-                  <div 
-                    className="absolute w-4 h-4 rounded-full animate-pulse z-5"
-                    style={{ backgroundColor: theme.accent }}
-                  />
-                )}
-                
                 {piece && (
                   <ChessPiece
                     piece={piece}
                     isSelected={isSelected}
-                    isInvalidMove={isInvalidMove}
                     onClick={() => onSquareClick(square)}
                     onDragStart={handleDragStart(square)}
                     onDragEnd={handleDragEnd}
                     isJokerRevealed={!jokerRevealComplete}
                     playerThemes={playerThemes}
                     isDragging={isDragging}
-                    globalTheme={globalTheme}
                   />
                 )}
               </div>

@@ -5,29 +5,25 @@ import { getTheme } from '../styles/themes';
 interface ChessPieceProps {
   piece: ChessPieceType;
   isSelected: boolean;
-  isInvalidMove?: boolean;
   onClick: () => void;
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
   isJokerRevealed?: boolean;
   playerThemes?: { white: string; black: string };
   isDragging?: boolean;
-  globalTheme?: string;
 }
 
 export const ChessPiece: React.FC<ChessPieceProps> = ({ 
   piece, 
   isSelected, 
-  isInvalidMove = false,
   onClick,
   onDragStart,
   onDragEnd,
   isJokerRevealed = false,
   playerThemes = { white: 'Princess Pink', black: 'Princess Pink' },
-  isDragging = false,
-  globalTheme = 'Princess Pink'
+  isDragging = false
 }) => {
-  const theme = getTheme(globalTheme);
+  const theme = getTheme(playerThemes[piece.color]);
   
   const getPieceSymbol = (piece: ChessPieceType): string => {
     const symbols = {
@@ -55,10 +51,8 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
   const isJokerPawn = piece.type === 'pawn' && piece.isJoker;
   const showJokerEffect = isJokerPawn && isJokerRevealed;
 
-  // Make white pieces white and black pieces lighter gray for better contrast
-  const pieceColor = piece.color === 'white' ? '#ffffff' : '#6b7280';
+  const pieceColor = piece.color === 'white' ? theme.primary : theme.text;
   const shadowColor = piece.color === 'white' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)';
-  const bgColor = piece.color === 'white' ? theme.boardLight : theme.boardDark;
 
   return (
     <div
@@ -72,7 +66,6 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
         ${isSelected ? 'scale-125 z-20 animate-bounce' : 'hover:scale-110'}
         ${showJokerEffect ? 'animate-pulse' : ''}
         ${isDragging ? 'opacity-50 scale-110 z-30' : ''}
-        ${isInvalidMove ? 'animate-bounce text-red-500' : ''}
       `}
       style={{
         filter: `drop-shadow(0 4px 8px ${shadowColor})`
@@ -87,21 +80,20 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
       <div 
         className="absolute inset-1 rounded-full opacity-90"
         style={{ 
-          backgroundColor: bgColor,
-          boxShadow: `inset 0 2px 4px rgba(255,255,255,0.3), 0 2px 8px ${bgColor}40`
+          backgroundColor: pieceColor,
+          boxShadow: `inset 0 2px 4px rgba(255,255,255,0.3), 0 2px 8px ${pieceColor}40`
         }}
       />
       
       {/* Piece Symbol */}
       <div className={`
-        text-5xl select-none relative z-10 font-bold
+        text-4xl select-none relative z-10 font-bold
         ${isSelected ? 'animate-bounce' : ''}
         ${showJokerEffect ? 'animate-pulse' : ''}
-        ${isInvalidMove ? 'animate-pulse text-red-600' : ''}
       `}
       style={{ 
-        color: pieceColor,
-        textShadow: piece.color === 'white' ? '0 2px 4px rgba(0,0,0,0.5)' : '0 2px 4px rgba(255,255,255,0.5)'
+        color: piece.color === 'white' ? '#ffffff' : '#000000',
+        textShadow: piece.color === 'white' ? '0 2px 4px rgba(0,0,0,0.3)' : '0 2px 4px rgba(255,255,255,0.3)'
       }}>
         {getPieceSymbol(piece)}
       </div>

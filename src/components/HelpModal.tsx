@@ -4,16 +4,9 @@ import { X, Heart, Zap, Clock, Crown } from 'lucide-react';
 interface HelpModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onOpen?: () => void;
 }
 
-export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, onOpen }) => {
-  React.useEffect(() => {
-    if (isOpen && onOpen) {
-      onOpen(); // Pause the game when help opens
-    }
-  }, [isOpen, onOpen]);
-
+export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
@@ -92,22 +85,6 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, onOpen })
             </ul>
           </div>
 
-          <div className="bg-yellow-50 rounded-2xl p-4 border-2 border-yellow-200">
-            <h3 className="text-xl font-semibold text-yellow-700 mb-2 flex items-center gap-2">
-              <Crown className="text-yellow-500" size={20} />
-              Pawn Promotion
-            </h3>
-            <p className="text-yellow-600 mb-2">
-              When a pawn reaches the opposite end of the board:
-            </p>
-            <ul className="text-yellow-600 text-sm space-y-1 ml-4">
-              <li>• Choose to promote it to Queen, Rook, Bishop, or Knight</li>
-              <li>• If a joker pawn is promoted, it loses its special joker status permanently</li>
-              <li>• A promoted joker pawn acts as the new piece and has no special properties</li>
-              <li>• Capturing a promoted joker pawn is completely safe - you won't lose!</li>
-            </ul>
-          </div>
-
           <div className="bg-green-50 rounded-2xl p-4 border-2 border-green-200">
             <h3 className="text-xl font-semibold text-green-700 mb-2">
               Win Conditions
@@ -117,8 +94,6 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, onOpen })
               <li>• Your opponent runs out of time</li>
               <li>• Your opponent captures YOUR joker pawn</li>
               <li>• Your opponent resigns</li>
-              <li>• Both players agree to a draw</li>
-              <li>• Stalemate (no legal moves but not in check)</li>
             </ul>
           </div>
         </div>
