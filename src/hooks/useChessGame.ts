@@ -30,7 +30,6 @@ export const useChessGame = () => {
   const [pendingPromotion, setPendingPromotion] = useState<{from: Square, to: Square} | null>(null);
   const [drawOffer, setDrawOffer] = useState<{from: PieceColor} | null>(null);
   const [gameEndReason, setGameEndReason] = useState<'checkmate' | 'timeout' | 'joker' | 'resignation' | 'draw' | 'stalemate' | null>(null);
-  const [showSavePrompt, setShowSavePrompt] = useState(false);
 
   const startGame = useCallback((whitePlayer: PlayerInfo, blackPlayer: PlayerInfo, timeControl: TimeControl) => {
     const board = getInitialBoard();
