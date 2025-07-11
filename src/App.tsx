@@ -186,14 +186,21 @@ function App() {
       {showGameEnd && (
         <GameEndModal
           winner={gameState.winner}
-          reason={
-            gameState.winner === undefined ? 'draw' :
-            gameState.gameStatus === 'ended' ? 'checkmate' : 'timeout'
-          }
+          reason={gameEndReason || (gameState.winner === undefined ? 'draw' : 'checkmate')}
           onNewGame={() => window.location.reload()}
           winnerName={gameState.winner ? (gameState.winner === 'white' ? players.white.name : players.black.name) : 'Draw'}
         />
       )}
+      
+      {/* Save Prompt Modal */}
+      <SavePromptModal
+        isOpen={showSavePrompt}
+        onSave={(filename) => handleSavePrompt(true, filename)}
+        onSkip={() => handleSavePrompt(false)}
+        player1Name={players.white.name}
+        player2Name={players.black.name}
+        theme={theme}
+      />
     </div>
   );
 }
