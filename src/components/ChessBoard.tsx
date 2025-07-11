@@ -1,85 +1,349 @@
-import React from 'react';
-import { PieceColor } from '../types/chess';
-import { Crown, Trophy, Skull } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChessPiece } from './ChessPiece';
+import { GameState, Square } from '../types/chess';
+import { FILES, RANKS } from '../utils/chessLogic';
+import { getTheme } from '../styles/themes';
 
-interface GameEndModalProps {
-  winner?: PieceColor;
-  reason: 'checkmate' | 'timeout' | 'joker' | 'resignation' | 'draw';
-  onNewGame: () => void;
-  winnerName: string;
-  onSaveGame?: () => void;
+interface ChessBoardProps {
+  gameState: GameState;
+  selectedSquare: Square | null;
+  onSquareClick: (square: Square) => void;
+  onMove: (from: Square, to: Square) => void;
+  playerThemes: { white: string; black: string };
+  jokerRevealComplete: boolean;
+  globalTheme: string;
+  possibleMoves: Square[];
+  isPaused: boolean;
 }
 
-export const GameEndModal: React.FC<GameEndModalProps> = ({
-  winner,
-  reason,
-  onNewGame,
-  winnerName,
-  onSaveGame
+export const ChessBoard: React.FC<ChessBoardProps> = ({
+  gameState,
+  selectedSquare,
+  onSquareClick,
+  onMove,
+  playerThemes,
+  jokerRevealComplete,
+  globalTheme,
+  possibleMoves,
+  isPaused
 }) => {
-  const getWinMessage = () => {
-    if (winner === undefined) {
-      if (reason === 'stalemate') {
-        return "🤝 It's a stalemate! No legal moves available - it's a draw!";
-      }
-      return "🤝 It's a draw by agreement! Great game!";
-    }
+  const [draggedPiece, setDraggedPiece] = useState<{ square: Square; piece: any } | null>(null);
+  const [dragOverSquare, setDragOverSquare] = useState<Square | null>(null);
+  const [captureAnimation, setCaptureAnimation] = useState<string | null>(null);
+  const [invalidMoveSquare, setInvalidMoveSquare] = useState<Square | null>(null);
+  
+  const theme = getTheme(globalTheme);
+
+  const playCheckSound = () => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
     
-    switch (reason) {
-      case 'joker':
-        return `💀 ${winnerName} wins! Their opponent captured the joker pawn!`;
-      case 'timeout':
-        return `⏰ ${winnerName} wins! Their opponent ran out of time!`;
-      case 'checkmate':
-        return `♔ ${winnerName} wins by checkmate!`;
-      case 'resignation':
-        return `🏳️ ${winnerName} wins! Their opponent resigned!`;
-      default:
-        return `🎉 ${winnerName} wins!`;
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1);
+    oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.2);
+    
+    gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+  };
+
+  const playCheckmateSound = () => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.5);
+    
+    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
+
+  const showInvalidMove = (square: Square) => {
+    setInvalidMoveSquare(square);
+    setTimeout(() => setInvalidMoveSquare(null), 500);
+  };
+
+  const playMoveSound = () => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  };
+
+  const playCaptureSound = () => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.2);
+    
+    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+  };
+
+  const triggerCaptureAnimation = () => {
+    const animations = ['stab', 'decapitate', 'blast', 'thunder', 'arrows'];
+    const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+    setCaptureAnimation(randomAnimation);
+    
+    setTimeout(() => {
+      setCaptureAnimation(null);
+    }, 1500);
+  };
+
+  const handleDragStart = (square: Square) => (e: React.DragEvent) => {
+    const piece = gameState.board.get(square);
+    if (piece && piece.color === gameState.currentPlayer && jokerRevealComplete && !isPaused) {
+      setDraggedPiece({ square, piece });
+      e.dataTransfer.effectAllowed = 'move';
+    } else {
+      e.preventDefault();
     }
   };
 
-  const getIcon = () => {
-    switch (reason) {
-      case 'draw':
-        return <Handshake className="text-green-500 animate-bounce" size={48} />;
-      case 'joker':
-        return <Skull className="text-red-500 animate-bounce" size={48} />;
-      case 'timeout':
-        return <Crown className="text-yellow-500 animate-bounce" size={48} />;
+  const handleDragEnd = () => {
+    setDraggedPiece(null);
+    setDragOverSquare(null);
+  };
+
+  const handleDragOver = (square: Square) => (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOverSquare(square);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverSquare(null);
+  };
+
+  const handleDrop = (square: Square) => (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOverSquare(null);
+    
+    if (draggedPiece && draggedPiece.square !== square) {
+      // Check if move is valid before playing sounds
+      const piece = gameState.board.get(draggedPiece.square);
+      if (piece && piece.color === gameState.currentPlayer) {
+        const targetPiece = gameState.board.get(square);
+        if (targetPiece) {
+          playCaptureSound();
+          triggerCaptureAnimation();
+        } else {
+          playMoveSound();
+        }
+        onMove(draggedPiece.square, square);
+      } else {
+        showInvalidMove(square);
+      }
+    }
+    setDraggedPiece(null);
+  };
+
+  // Play check/checkmate sounds when game state changes
+  React.useEffect(() => {
+    if (gameState.gameStatus === 'ended' && gameState.winner) {
+      playCheckmateSound();
+    }
+  }, [gameState.gameStatus, gameState.winner]);
+
+  const isLightSquare = (file: number, rank: number): boolean => {
+    return (file + rank) % 2 === 0;
+  };
+
+  const getSquareColor = (file: number, rank: number): string => {
+    const isLight = isLightSquare(file, rank);
+    return isLight ? theme.boardLight : theme.boardDark;
+  };
+
+  const getCaptureAnimationEffect = () => {
+    switch (captureAnimation) {
+      case 'stab':
+        return (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="text-6xl animate-ping">⚔️</div>
+            <div className="absolute inset-0 bg-red-600 opacity-30 animate-pulse" />
+          </div>
+        );
+      case 'decapitate':
+        return (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="text-6xl animate-bounce">🗡️</div>
+            <div className="absolute inset-0 bg-red-700 opacity-40 animate-pulse" />
+            <div className="absolute top-0 left-0 w-full h-full">
+              {[...Array(10)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-2 h-2 bg-red-500 rounded-full animate-ping"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 0.5}s`
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      case 'blast':
+        return (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="text-6xl animate-spin">💥</div>
+            <div className="absolute inset-0 bg-orange-600 opacity-40 animate-pulse" />
+          </div>
+        );
+      case 'thunder':
+        return (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="text-6xl animate-pulse">⚡</div>
+            <div className="absolute inset-0 bg-yellow-400 opacity-50 animate-ping" />
+          </div>
+        );
+      case 'arrows':
+        return (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="text-6xl animate-bounce">🏹</div>
+            <div className="absolute inset-0 bg-red-500 opacity-35 animate-pulse" />
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute text-2xl animate-ping"
+                style={{
+                  left: `${20 + i * 15}%`,
+                  top: `${20 + i * 15}%`,
+                  animationDelay: `${i * 0.1}s`
+                }}
+              >
+                ➤
+              </div>
+            ))}
+          </div>
+        );
       default:
-        return <Trophy className="text-gold-500 animate-bounce" size={48} />;
+        return null;
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center relative overflow-hidden">
-        {/* Confetti Effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-purple-100 animate-pulse" />
-        
-        <div className="relative z-10">
-          <div className="mb-6">
-            {getIcon()}
+    <div className="relative">
+      {/* Capture Animation Overlay */}
+      {captureAnimation && getCaptureAnimationEffect()}
+      
+      {/* Board */}
+      <div 
+        className="grid grid-cols-8 gap-0 border-4 rounded-2xl overflow-hidden shadow-2xl relative"
+        style={{ 
+          borderColor: theme.border,
+          width: '600px',
+          height: '600px'
+        }}
+      >
+        {RANKS.slice().reverse().map((rank, rankIndex) =>
+          FILES.map((file, fileIndex) => {
+            const square = `${file}${rank}` as Square;
+            const piece = gameState.board.get(square);
+            const isSelected = selectedSquare === square;
+            const isDragOver = dragOverSquare === square;
+            const isPossibleMove = possibleMoves.includes(square);
+            const isInvalidMove = invalidMoveSquare === square;
+            const isKingInCheckSquare = kingInCheck === square;
+            const actualRank = 7 - rankIndex;
+            const isDragging = draggedPiece?.square === square;
+            
+            return (
+              <div
+                key={square}
+                onClick={() => onSquareClick(square)}
+                onDragOver={handleDragOver(square)}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop(square)}
+                className={`
+                  w-[75px] h-[75px] flex items-center justify-center cursor-pointer
+                  transition-all duration-200 relative
+                  ${isSelected ? 'ring-4 ring-yellow-400 ring-inset z-10' : ''}
+                  ${isDragOver ? 'ring-4 ring-green-400 ring-inset' : ''}
+                  ${isInvalidMove ? 'animate-pulse bg-red-400' : ''}
+                  ${isKingInCheckSquare ? 'bg-red-200' : ''}
+                  hover:brightness-110
+                `}
+                style={{ 
+                  backgroundColor: isKingInCheckSquare ? '#fecaca' : getSquareColor(fileIndex, actualRank),
+                  boxShadow: isDragOver ? 'inset 0 0 20px rgba(34, 197, 94, 0.3)' : undefined
+                }}
+              >
+                {/* Possible Move Indicator */}
+                {isPossibleMove && (
+                  <div 
+                    className="absolute w-4 h-4 rounded-full animate-pulse z-5"
+                    style={{ backgroundColor: theme.accent }}
+                  />
+                )}
+                
+                {piece && (
+                  <ChessPiece
+                    piece={piece}
+                    isSelected={isSelected}
+                    isInvalidMove={isInvalidMove}
+                    onClick={() => onSquareClick(square)}
+                    onDragStart={handleDragStart(square)}
+                    onDragEnd={handleDragEnd}
+                    isJokerRevealed={!jokerRevealComplete}
+                    playerThemes={playerThemes}
+                    isDragging={isDragging}
+                    globalTheme={globalTheme}
+                  />
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+      
+      {/* File Labels (bottom) */}
+      <div className="flex justify-center mt-2">
+        {FILES.map((file) => (
+          <div key={file} className="w-[75px] text-center font-bold" style={{ color: theme.text }}>
+            {file}
           </div>
-          
-          <h2 className="text-3xl font-bold text-purple-600 mb-4">
-            {winner === undefined ? 'Draw!' : 'Game Over!'}
-          </h2>
-          
-          <p className="text-lg text-purple-700 mb-6">
-            {getWinMessage()}
-          </p>
-          
-          <div className="space-y-3">
-            <button
-              onClick={onNewGame}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-2xl font-semibold hover:from-pink-600 hover:to-purple-600 transition-all duration-200 shadow-lg"
-            >
-              🎮 Play Again
-            </button>
+        ))}
+      </div>
+      
+      {/* Rank Labels (left) */}
+      <div className="absolute left-0 top-0 h-full flex flex-col-reverse justify-center -ml-8">
+        {RANKS.map((rank) => (
+          <div key={rank} className="h-[75px] flex items-center justify-center font-bold" style={{ color: theme.text }}>
+            {rank}
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

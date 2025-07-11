@@ -29,9 +29,6 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
 }) => {
   const theme = getTheme(globalTheme);
   
-  // Check if this king is in check for red coloring
-  const isKingInCheck = piece.type === 'king' && isInvalidMove;
-  
   const getPieceSymbol = (piece: ChessPieceType): string => {
     const symbols = {
       white: {
@@ -59,9 +56,9 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
   const showJokerEffect = isJokerPawn && isJokerRevealed;
 
   // Make white pieces white and black pieces lighter gray for better contrast
-  const pieceColor = piece.color === 'white' ? '#ffffff' : '#9ca3af'; // Lighter gray for black pieces
+  const pieceColor = piece.color === 'white' ? '#ffffff' : '#6b7280';
   const shadowColor = piece.color === 'white' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)';
-  const bgColor = isKingInCheck ? '#fca5a5' : (piece.color === 'white' ? theme.boardLight : theme.boardDark); // Red tint for king in check
+  const bgColor = piece.color === 'white' ? theme.boardLight : theme.boardDark;
 
   return (
     <div

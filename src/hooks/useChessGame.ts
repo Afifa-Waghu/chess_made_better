@@ -114,7 +114,7 @@ export const useChessGame = () => {
     setGameState(prev => ({ ...prev, lastMoveTime: Date.now() }));
     // Start timer immediately when joker reveal is complete
     startGameTimer();
-  }, [startGameTimer]);
+  }, []);
 
   const pauseGame = useCallback(() => {
     setIsPaused(true);
@@ -425,7 +425,7 @@ export const useChessGame = () => {
     setShowPossibleMoves,
     saveGame,
     loadGame,
-    getSavedGames,
+    getSavedGames
     gameEndReason,
     setGameEndReason
   };
