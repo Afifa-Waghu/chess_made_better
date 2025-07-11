@@ -3,19 +3,30 @@ import { PieceColor } from '../types/chess';
 import { Crown, Trophy, Skull } from 'lucide-react';
 
 interface GameEndModalProps {
-  winner: PieceColor;
+  winner?: PieceColor;
   reason: 'checkmate' | 'timeout' | 'joker' | 'resignation';
   onNewGame: () => void;
   winnerName: string;
+  isDraw?: boolean;
 }
 
 export const GameEndModal: React.FC<GameEndModalProps> = ({
   winner,
   reason,
   onNewGame,
-  winnerName
+  winnerName,
+  isDraw = false
 }) => {
   const getWinMessage = () => {
+    if (isDraw) {
+      switch (reason) {
+        case 'stalemate':
+          return '🤝 It\'s a draw! Stalemate - no legal moves available!';
+        default:
+          return '🤝 It\'s a draw! Both players agreed to a draw!';
+      }
+    }
+    
     switch (reason) {
       case 'joker':
         return `💀 ${winnerName} wins! Their opponent captured the joker pawn!`;
@@ -35,7 +46,7 @@ export const GameEndModal: React.FC<GameEndModalProps> = ({
       case 'timeout':
         return <Crown className="text-yellow-500 animate-bounce" size={48} />;
       default:
-        return <Trophy className="text-gold-500 animate-bounce" size={48} />;
+        return <Trophy className="text-yellow-500 animate-bounce" size={48} />;
     }
   };
 
@@ -51,7 +62,7 @@ export const GameEndModal: React.FC<GameEndModalProps> = ({
           </div>
           
           <h2 className="text-3xl font-bold text-purple-600 mb-4">
-            Game Over!
+            {isDraw ? 'Draw!' : 'Game Over!'}
           </h2>
           
           <p className="text-lg text-purple-700 mb-6">

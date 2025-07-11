@@ -9,8 +9,9 @@ interface ChessPieceProps {
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
   isJokerRevealed?: boolean;
-  playerThemes?: { white: string; black: string };
   isDragging?: boolean;
+  globalTheme: string;
+  isInvalid?: boolean;
 }
 
 export const ChessPiece: React.FC<ChessPieceProps> = ({ 
@@ -20,10 +21,11 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
   onDragStart,
   onDragEnd,
   isJokerRevealed = false,
-  playerThemes = { white: 'Princess Pink', black: 'Princess Pink' },
-  isDragging = false
+  isDragging = false,
+  globalTheme,
+  isInvalid = false
 }) => {
-  const theme = getTheme(playerThemes[piece.color]);
+  const theme = getTheme(globalTheme);
   
   const getPieceSymbol = (piece: ChessPieceType): string => {
     const symbols = {
@@ -66,9 +68,11 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
         ${isSelected ? 'scale-125 z-20 animate-bounce' : 'hover:scale-110'}
         ${showJokerEffect ? 'animate-pulse' : ''}
         ${isDragging ? 'opacity-50 scale-110 z-30' : ''}
+        ${isInvalid ? 'animate-shake' : ''}
       `}
       style={{
-        filter: `drop-shadow(0 4px 8px ${shadowColor})`
+        filter: `drop-shadow(0 4px 8px ${shadowColor})`,
+        color: isInvalid ? '#ef4444' : undefined
       }}
     >
       {/* Joker Effect */}
@@ -80,16 +84,17 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
       <div 
         className="absolute inset-1 rounded-full opacity-90"
         style={{ 
-          backgroundColor: pieceColor,
-          boxShadow: `inset 0 2px 4px rgba(255,255,255,0.3), 0 2px 8px ${pieceColor}40`
+          backgroundColor: isInvalid ? '#ef4444' : pieceColor,
+          boxShadow: `inset 0 2px 4px rgba(255,255,255,0.3), 0 2px 8px ${isInvalid ? '#ef4444' : pieceColor}40`
         }}
       />
       
       {/* Piece Symbol */}
       <div className={`
-        text-4xl select-none relative z-10 font-bold
+        text-5xl select-none relative z-10 font-bold
         ${isSelected ? 'animate-bounce' : ''}
         ${showJokerEffect ? 'animate-pulse' : ''}
+        ${isInvalid ? 'animate-shake' : ''}
       `}
       style={{ 
         color: piece.color === 'white' ? '#ffffff' : '#000000',

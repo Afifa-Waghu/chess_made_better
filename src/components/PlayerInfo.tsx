@@ -11,6 +11,7 @@ interface PlayerInfoProps {
   theme: string;
   capturedPieces: ChessPiece[];
   isTop: boolean;
+  isInCheck?: boolean;
 }
 
 export const PlayerInfo: React.FC<PlayerInfoProps> = ({
@@ -20,7 +21,8 @@ export const PlayerInfo: React.FC<PlayerInfoProps> = ({
   isActive,
   theme,
   capturedPieces,
-  isTop
+  isTop,
+  isInCheck = false
 }) => {
   const playerTheme = getTheme(theme);
   
@@ -62,9 +64,10 @@ export const PlayerInfo: React.FC<PlayerInfoProps> = ({
       flex items-center gap-6 px-6 py-3 rounded-2xl border-2 transition-all duration-200 backdrop-blur-sm
       ${isActive ? 'scale-105 shadow-lg' : ''}
       ${isCriticalTime ? 'animate-pulse' : ''}
+      ${isInCheck ? 'ring-2 ring-red-500' : ''}
     `}
     style={{ 
-      backgroundColor: `${playerTheme.background}90`,
+      backgroundColor: isInCheck ? '#fef2f2' : `${playerTheme.background}90`,
       borderColor: isActive ? playerTheme.accent : playerTheme.border,
       boxShadow: isActive ? `0 8px 25px ${playerTheme.accent}40` : undefined
     }}>
@@ -73,7 +76,7 @@ export const PlayerInfo: React.FC<PlayerInfoProps> = ({
       
       {/* Player Name */}
       <div className="text-lg font-bold" style={{ color: playerTheme.text }}>
-        {name}
+        {name} {isInCheck && '👑⚠️'}
       </div>
       
       {/* Timer */}

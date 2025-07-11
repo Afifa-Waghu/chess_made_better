@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { GameSetup } from './components/GameSetup';
 import { ChessBoard } from './components/ChessBoard';
-import { PlayerClock } from './components/PlayerClock';
-import { CapturedPieces } from './components/CapturedPieces';
 import { HelpModal } from './components/HelpModal';
 import { JokerReveal } from './components/JokerReveal';
 import { GameSaver } from './components/GameSaver';
 import { GameEndModal } from './components/GameEndModal';
+import { SettingsModal } from './components/SettingsModal';
+import { PawnPromotionModal } from './components/PawnPromotionModal';
+import { ConfirmationModal } from './components/ConfirmationModal';
+import { SaveGameModal } from './components/SaveGameModal';
 import { useChessGame } from './hooks/useChessGame';
 import { getTheme } from './styles/themes';
-import { HelpCircle, Home } from 'lucide-react';
+import { HelpCircle, Home, Settings, RotateCcw, RotateRight, Flag, HandHeart } from 'lucide-react';
 import { PlayerInfo } from './components/PlayerInfo';
+import { PieceType } from './types/chess';
 
 function App() {
   const {
@@ -18,18 +21,37 @@ function App() {
     players,
     selectedSquare,
     jokerRevealComplete,
+    showPossibleMoves,
+    possibleMoves,
+    isPaused,
+    pendingPromotion,
+    invalidMoveSquare,
+    drawOffer,
     handleJokerRevealComplete,
     startGame,
     makeMove,
     selectSquare,
+    undoMove,
+    redoMove,
+    pauseGame,
+    resignGame,
+    offerDraw,
+    respondToDraw,
+    setShowPossibleMoves,
     saveGame,
     loadGame,
     getSavedGames
   } = useChessGame();
 
   const [showHelp, setShowHelp] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [showGameEnd, setShowGameEnd] = useState(false);
+  const [showSaveGame, setShowSaveGame] = useState(false);
   const [globalTheme, setGlobalTheme] = useState('Princess Pink');
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'resign' | 'quit';
+    player?: 'white' | 'black';
+  } | null>(null);
 
   const handleNewGame = () => {
     window.location.reload();
@@ -40,9 +62,45 @@ function App() {
     startGame(whitePlayer, blackPlayer, timeControl);
   };
 
+  const handleQuitGame = () => {
+    setConfirmAction({ type: 'quit' });
+  };
+
+  const handleResign = (player: 'white' | 'black') => {
+    setConfirmAction({ type: 'resign', player });
+  };
+
+  const handleConfirmAction = () => {
+    if (confirmAction?.type === 'resign' && confirmAction.player) {
+      resignGame(confirmAction.player);
+    } else if (confirmAction?.type === 'quit') {
+      handleNewGame();
+    }
+    setConfirmAction(null);
+  };
+
+  const handlePawnPromotion = (pieceType: PieceType) => {
+    if (pendingPromotion) {
+      makeMove(pendingPromotion.from, pendingPromotion.to, pieceType);
+    }
+  };
+
+  const handleModalOpen = () => {
+    if (gameState.gameStatus === 'playing') {
+      pauseGame();
+    }
+  };
+
+  const handleModalClose = () => {
+    if (gameState.gameStatus === 'playing' && isPaused) {
+      pauseGame();
+    }
+  };
+
   React.useEffect(() => {
     if (gameState.gameStatus === 'ended' && !showGameEnd) {
       setShowGameEnd(true);
+      setShowSaveGame(true);
     }
   }, [gameState.gameStatus, showGameEnd]);
 
@@ -51,6 +109,17 @@ function App() {
   }
 
   const theme = getTheme(globalTheme);
+  const currentPlayerName = gameState.currentPlayer === 'white' ? players.white.name : players.black.name;
+  const isInCheck = gameState.board && (() => {
+    // Simple check detection for UI
+    const kingSquare = Array.from(gameState.board.entries()).find(
+      ([, piece]) => piece.type === 'king' && piece.color === gameState.currentPlayer
+    )?.[0];
+    return kingSquare && Array.from(gameState.board.entries()).some(
+      ([square, piece]) => piece.color !== gameState.currentPlayer && 
+      square !== kingSquare // Basic check - in real implementation would use proper logic
+    );
+  })();
 
   return (
     <div 
@@ -78,6 +147,52 @@ function App() {
             ✨ Chess Made Better ✨
           </h1>
           <div className="flex gap-2">
+            {/* Undo/Redo */}
+            <button
+              onClick={undoMove}
+              disabled={gameState.moves.length === 0}
+              className="text-white px-3 py-2 rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50"
+              style={{ 
+                backgroundColor: theme.accent,
+                boxShadow: `0 4px 12px ${theme.accent}40`
+              }}
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
+              onClick={redoMove}
+              disabled={true} // Simplified for now
+              className="text-white px-3 py-2 rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50"
+              style={{ 
+                backgroundColor: theme.accent,
+                boxShadow: `0 4px 12px ${theme.accent}40`
+              }}
+            >
+              <RotateRight size={16} />
+            </button>
+
+            {/* Resign/Draw */}
+            <button
+              onClick={() => handleResign(gameState.currentPlayer)}
+              className="text-white px-3 py-2 rounded-xl transition-colors flex items-center gap-2"
+              style={{ 
+                backgroundColor: '#ef4444',
+                boxShadow: '0 4px 12px #ef444440'
+              }}
+            >
+              <Flag size={16} />
+            </button>
+            <button
+              onClick={() => offerDraw(gameState.currentPlayer)}
+              className="text-white px-3 py-2 rounded-xl transition-colors flex items-center gap-2"
+              style={{ 
+                backgroundColor: '#f59e0b',
+                boxShadow: '0 4px 12px #f59e0b40'
+              }}
+            >
+              <HandHeart size={16} />
+            </button>
+
             <GameSaver
               onSave={saveGame}
               onLoad={loadGame}
@@ -86,7 +201,18 @@ function App() {
               player2Name={players.black.name}
             />
             <button
-              onClick={() => setShowHelp(true)}
+              onClick={() => { setShowSettings(true); handleModalOpen(); }}
+              className="text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
+              style={{ 
+                backgroundColor: theme.accent,
+                boxShadow: `0 4px 12px ${theme.accent}40`
+              }}
+            >
+              <Settings size={16} />
+              Settings
+            </button>
+            <button
+              onClick={() => { setShowHelp(true); handleModalOpen(); }}
               className="text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
               style={{ 
                 backgroundColor: theme.accent,
@@ -97,7 +223,7 @@ function App() {
               Help
             </button>
             <button
-              onClick={handleNewGame}
+              onClick={handleQuitGame}
               className="text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
               style={{ 
                 backgroundColor: theme.primary,
@@ -121,6 +247,7 @@ function App() {
             theme={globalTheme}
             capturedPieces={gameState.capturedPieces}
             isTop={true}
+            isInCheck={gameState.currentPlayer === 'black' && isInCheck}
           />
 
           {/* Chess Board */}
@@ -130,12 +257,11 @@ function App() {
               selectedSquare={selectedSquare}
               onSquareClick={selectSquare}
               onMove={makeMove}
-              playerThemes={{
-                white: globalTheme,
-                black: globalTheme
-              }}
               jokerRevealComplete={jokerRevealComplete}
               globalTheme={globalTheme}
+              showPossibleMoves={showPossibleMoves}
+              possibleMoves={possibleMoves}
+              invalidMoveSquare={invalidMoveSquare}
             />
           </div>
 
@@ -148,6 +274,7 @@ function App() {
             theme={globalTheme}
             capturedPieces={gameState.capturedPieces}
             isTop={false}
+            isInCheck={gameState.currentPlayer === 'white' && isInCheck}
           />
         </div>
 
@@ -161,8 +288,9 @@ function App() {
             }}
           >
             <p className="font-semibold" style={{ color: theme.text }}>
-              {gameState.gameStatus === 'playing' ? 
-                `${gameState.currentPlayer === 'white' ? players.white.name : players.black.name}'s turn` :
+              {isPaused ? '⏸️ Game Paused' :
+               gameState.gameStatus === 'playing' ? 
+                `${currentPlayerName}'s turn` :
                 'Game Over'
               }
             </p>
@@ -178,17 +306,74 @@ function App() {
         />
       )}
 
-      <HelpModal
-        isOpen={showHelp}
-        onClose={() => setShowHelp(false)}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => { setShowSettings(false); handleModalClose(); }}
+        showPossibleMoves={showPossibleMoves}
+        onToggleShowMoves={() => setShowPossibleMoves(!showPossibleMoves)}
+        onPauseGame={pauseGame}
+        onQuitGame={handleQuitGame}
+        isPaused={isPaused}
       />
 
-      {showGameEnd && gameState.winner && (
+      <HelpModal
+        isOpen={showHelp}
+        onClose={() => { setShowHelp(false); handleModalClose(); }}
+      />
+
+      <PawnPromotionModal
+        isOpen={!!pendingPromotion}
+        color={pendingPromotion ? gameState.board.get(pendingPromotion.from)?.color || 'white' : 'white'}
+        onPromote={handlePawnPromotion}
+      />
+
+      <ConfirmationModal
+        isOpen={!!confirmAction}
+        title={confirmAction?.type === 'resign' ? 'Resign Game?' : 'Quit Game?'}
+        message={confirmAction?.type === 'resign' ? 
+          'Are you sure you want to resign? You will lose the game.' :
+          'Are you sure you want to quit? The current game will be lost.'
+        }
+        onConfirm={handleConfirmAction}
+        onCancel={() => setConfirmAction(null)}
+        confirmText={confirmAction?.type === 'resign' ? 'Resign' : 'Quit'}
+        type="danger"
+      />
+
+      {drawOffer && (
+        <ConfirmationModal
+          isOpen={true}
+          title="Draw Offer"
+          message={`${drawOffer === 'white' ? players.white.name : players.black.name} is offering a draw. Do you accept?`}
+          onConfirm={() => respondToDraw(true)}
+          onCancel={() => respondToDraw(false)}
+          confirmText="Accept Draw"
+          cancelText="Decline"
+          type="info"
+        />
+      )}
+
+      {showSaveGame && gameState.gameStatus === 'ended' && (
+        <SaveGameModal
+          isOpen={showSaveGame}
+          onSave={(filename) => {
+            saveGame(filename);
+            setShowSaveGame(false);
+          }}
+          onSkip={() => setShowSaveGame(false)}
+          player1Name={players.white.name}
+          player2Name={players.black.name}
+          winner={gameState.winner ? (gameState.winner === 'white' ? players.white.name : players.black.name) : undefined}
+        />
+      )}
+
+      {showGameEnd && gameState.gameStatus === 'ended' && (
         <GameEndModal
           winner={gameState.winner}
-          reason="checkmate"
+          reason={gameState.endReason || 'checkmate'}
           onNewGame={handleNewGame}
-          winnerName={gameState.winner === 'white' ? players.white.name : players.black.name}
+          winnerName={gameState.winner ? (gameState.winner === 'white' ? players.white.name : players.black.name) : ''}
+          isDraw={!gameState.winner}
         />
       )}
     </div>

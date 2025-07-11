@@ -9,9 +9,11 @@ interface ChessBoardProps {
   selectedSquare: Square | null;
   onSquareClick: (square: Square) => void;
   onMove: (from: Square, to: Square) => void;
-  playerThemes: { white: string; black: string };
   jokerRevealComplete: boolean;
   globalTheme: string;
+  showPossibleMoves: boolean;
+  possibleMoves: Square[];
+  invalidMoveSquare: Square | null;
 }
 
 export const ChessBoard: React.FC<ChessBoardProps> = ({
@@ -19,9 +21,11 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   selectedSquare,
   onSquareClick,
   onMove,
-  playerThemes,
   jokerRevealComplete,
-  globalTheme
+  globalTheme,
+  showPossibleMoves,
+  possibleMoves,
+  invalidMoveSquare
 }) => {
   const [draggedPiece, setDraggedPiece] = useState<{ square: Square; piece: any } | null>(null);
   const [dragOverSquare, setDragOverSquare] = useState<Square | null>(null);
@@ -215,6 +219,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
             const isDragOver = dragOverSquare === square;
             const actualRank = 7 - rankIndex;
             const isDragging = draggedPiece?.square === square;
+            const isPossibleMove = possibleMoves.includes(square);
             
             return (
               <div
@@ -235,6 +240,16 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                   boxShadow: isDragOver ? 'inset 0 0 20px rgba(34, 197, 94, 0.3)' : undefined
                 }}
               >
+                {/* Possible Move Indicator */}
+                {isPossibleMove && showPossibleMoves && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div 
+                      className="w-4 h-4 rounded-full animate-pulse"
+                      style={{ backgroundColor: theme.accent }}
+                    />
+                  </div>
+                )}
+                
                 {piece && (
                   <ChessPiece
                     piece={piece}
@@ -243,8 +258,9 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                     onDragStart={handleDragStart(square)}
                     onDragEnd={handleDragEnd}
                     isJokerRevealed={!jokerRevealComplete}
-                    playerThemes={playerThemes}
                     isDragging={isDragging}
+                    globalTheme={globalTheme}
+                    isInvalid={invalidMoveSquare === square}
                   />
                 )}
               </div>

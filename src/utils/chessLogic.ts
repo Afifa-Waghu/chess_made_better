@@ -122,7 +122,7 @@ export const isValidMove = (from: Square, to: Square, board: Map<Square, ChessPi
   
   switch (piece.type) {
     case 'pawn':
-      isValidPieceMove = isValidPawnMove(piece, fromFile, fromRank, toFile, toRank, !!targetPiece);
+      isValidPieceMove = isValidPawnMove(piece, fromFile, fromRank, toFile, toRank, !!targetPiece, board);
       break;
     case 'rook':
       isValidPieceMove = (fileDiff === 0 || rankDiff === 0) && isPathClear(from, to, board);
@@ -149,14 +149,18 @@ export const isValidMove = (from: Square, to: Square, board: Map<Square, ChessPi
   return !wouldBeInCheck(from, to, board);
 };
 
-const isValidPawnMove = (piece: ChessPiece, fromFile: number, fromRank: number, toFile: number, toRank: number, isCapture: boolean): boolean => {
+const isValidPawnMove = (piece: ChessPiece, fromFile: number, fromRank: number, toFile: number, toRank: number, isCapture: boolean, board: Map<Square, ChessPiece>): boolean => {
   const direction = piece.color === 'white' ? 1 : -1;
   const startRank = piece.color === 'white' ? 1 : 6;
   
   // Forward move
   if (fromFile === toFile && !isCapture) {
     if (toRank === fromRank + direction) return true;
-    if (fromRank === startRank && toRank === fromRank + 2 * direction) return true;
+    if (fromRank === startRank && toRank === fromRank + 2 * direction) {
+      // Check if path is clear for double move
+      const middleSquare = squareToString(fromFile, fromRank + direction);
+      return !board.has(middleSquare);
+    }
   }
   
   // Capture move
@@ -186,6 +190,59 @@ const isPathClear = (from: Square, to: Square, board: Map<Square, ChessPiece>): 
   }
   
   return true;
+};
+
+export const isPawnPromotion = (from: Square, to: Square, piece: ChessPiece): boolean => {
+  if (piece.type !== 'pawn') return false;
+  
+  const [, toRank] = parseSquare(to);
+  
+  if (piece.color === 'white' && toRank === 7) return true;
+  if (piece.color === 'black' && toRank === 0) return true;
+  
+  return false;
+};
+
+export const isStalemate = (color: PieceColor, board: Map<Square, ChessPiece>): boolean => {
+  if (isInCheck(color, board)) return false; // Can't be stalemate if in check
+  
+  // Check if player has any legal moves
+  for (const [fromSquare, piece] of board.entries()) {
+    if (piece.color !== color) continue;
+    
+    // Try all possible destination squares
+    for (let file = 0; file < 8; file++) {
+      for (let rank = 0; rank < 8; rank++) {
+        const toSquare = squareToString(file, rank);
+        
+        if (isValidMove(fromSquare, toSquare, board)) {
+          return false; // Found a legal move, not stalemate
+        }
+      }
+    }
+  }
+  
+  return true; // No legal moves found, it's stalemate
+};
+
+export const getPossibleMoves = (square: Square, board: Map<Square, ChessPiece>): Square[] => {
+  const moves: Square[] = [];
+  const piece = board.get(square);
+  
+  if (!piece) return moves;
+  
+  // Try all possible destination squares
+  for (let file = 0; file < 8; file++) {
+    for (let rank = 0; rank < 8; rank++) {
+      const toSquare = squareToString(file, rank);
+      
+      if (isValidMove(square, toSquare, board)) {
+        moves.push(toSquare);
+      }
+    }
+  }
+  
+  return moves;
 };
 
 export const isInCheck = (color: PieceColor, board: Map<Square, ChessPiece>): boolean => {

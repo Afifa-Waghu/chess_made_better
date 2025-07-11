@@ -51,6 +51,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <li>• If you capture your opponent's joker pawn, YOU LOSE immediately!</li>
               <li>• Joker pawns are revealed briefly at the start, then hidden</li>
               <li>• They move exactly like normal pawns</li>
+              <li>• If a joker pawn is promoted, it loses its joker status and becomes a normal piece</li>
+              <li>• Capturing a promoted joker pawn will NOT cause you to lose</li>
               <li>• Choose your captures wisely!</li>
             </ul>
           </div>

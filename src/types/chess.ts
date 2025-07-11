@@ -17,6 +17,7 @@ export interface Move {
   capturedPiece?: ChessPiece;
   isCapture: boolean;
   timestamp: number;
+  promotionPiece?: PieceType;
 }
 
 export interface GameState {
@@ -31,6 +32,7 @@ export interface GameState {
   capturedPieces: ChessPiece[];
   jokerPawns: { white: Square; black: Square };
   gameId?: string;
+  endReason?: 'checkmate' | 'timeout' | 'joker' | 'resignation' | 'stalemate' | 'draw';
 }
 
 export interface PlayerInfo {
