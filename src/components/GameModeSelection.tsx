@@ -1,5 +1,5 @@
 import React from 'react';
-import { Crown, Sparkles, Shuffle, Chess } from 'lucide-react';
+import { Crown, Sparkles, Shuffle, Check as Chess } from 'lucide-react';
 
 interface GameModeSelectionProps {
   onSelectMode: (mode: 'standard' | 'chess960' | 'joker') => void;
