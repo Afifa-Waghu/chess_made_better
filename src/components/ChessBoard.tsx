@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChessPiece } from './ChessPiece';
 import { GameState, Square } from '../types/chess';
-import { FILES, RANKS, findKing } from '../utils/chessLogic';
+import { FILES, RANKS } from '../utils/chessLogic';
 import { getTheme } from '../styles/themes';
 
 interface ChessBoardProps {
@@ -14,8 +14,6 @@ interface ChessBoardProps {
   showPossibleMoves: boolean;
   possibleMoves: Square[];
   invalidMoveSquare: Square | null;
-  whiteKingInCheck: boolean;
-  blackKingInCheck: boolean;
 }
 
 export const ChessBoard: React.FC<ChessBoardProps> = ({
@@ -110,6 +108,13 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     setDragOverSquare(null);
     
     if (draggedPiece && draggedPiece.square !== square) {
+      const targetPiece = gameState.board.get(square);
+      if (targetPiece) {
+        playCaptureSound();
+        triggerCaptureAnimation();
+      } else {
+        playMoveSound();
+      }
       onMove(draggedPiece.square, square);
     }
     setDraggedPiece(null);
@@ -124,16 +129,79 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     return isLight ? theme.boardLight : theme.boardDark;
   };
 
-  const whiteKingSquare = findKing('white', gameState.board);
-  const blackKingSquare = findKing('black', gameState.board);
-  
-  const isKingInCheck = (square: Square): boolean => {
-    return (square === whiteKingSquare && whiteKingInCheck) || 
-           (square === blackKingSquare && blackKingInCheck);
+  const getCaptureAnimationEffect = () => {
+    switch (captureAnimation) {
+      case 'stab':
+        return (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="text-6xl animate-ping">⚔️</div>
+            <div className="absolute inset-0 bg-red-600 opacity-30 animate-pulse" />
+          </div>
+        );
+      case 'decapitate':
+        return (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="text-6xl animate-bounce">🗡️</div>
+            <div className="absolute inset-0 bg-red-700 opacity-40 animate-pulse" />
+            <div className="absolute top-0 left-0 w-full h-full">
+              {[...Array(10)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-2 h-2 bg-red-500 rounded-full animate-ping"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 0.5}s`
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      case 'blast':
+        return (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="text-6xl animate-spin">💥</div>
+            <div className="absolute inset-0 bg-orange-600 opacity-40 animate-pulse" />
+          </div>
+        );
+      case 'thunder':
+        return (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="text-6xl animate-pulse">⚡</div>
+            <div className="absolute inset-0 bg-yellow-400 opacity-50 animate-ping" />
+          </div>
+        );
+      case 'arrows':
+        return (
+          <div className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="text-6xl animate-bounce">🏹</div>
+            <div className="absolute inset-0 bg-red-500 opacity-35 animate-pulse" />
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute text-2xl animate-ping"
+                style={{
+                  left: `${20 + i * 15}%`,
+                  top: `${20 + i * 15}%`,
+                  animationDelay: `${i * 0.1}s`
+                }}
+              >
+                ➤
+              </div>
+            ))}
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="relative">
+      {/* Capture Animation Overlay */}
+      {captureAnimation && getCaptureAnimationEffect()}
+      
       {/* Board */}
       <div 
         className="grid grid-cols-8 gap-0 border-2 sm:border-4 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl relative mx-auto"
@@ -154,7 +222,6 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
             const actualRank = 7 - rankIndex;
             const isDragging = draggedPiece?.square === square;
             const isPossibleMove = possibleMoves.includes(square);
-            const isKingUnderCheck = isKingInCheck(square);
             
             return (
               <div
@@ -168,11 +235,10 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                   transition-all duration-200 relative
                   ${isSelected ? 'ring-4 ring-yellow-400 ring-inset z-10' : ''}
                   ${isDragOver ? 'ring-4 ring-green-400 ring-inset' : ''}
-                  ${isKingUnderCheck ? 'ring-4 ring-red-500 ring-inset animate-pulse' : ''}
                   hover:brightness-110
                 `}
                 style={{ 
-                  backgroundColor: isKingUnderCheck ? '#fca5a5' : getSquareColor(fileIndex, actualRank),
+                  backgroundColor: getSquareColor(fileIndex, actualRank),
                   boxShadow: isDragOver ? 'inset 0 0 20px rgba(34, 197, 94, 0.3)' : undefined
                 }}
               >

@@ -327,12 +327,3 @@ export const getTimeBonus = (capturedPiece: ChessPiece): number => {
     default: return 0;
   }
 };
-
-export const findKing = (color: PieceColor, board: Map<Square, ChessPiece>): Square | null => {
-  for (const [square, piece] of board.entries()) {
-    if (piece.type === 'king' && piece.color === color) {
-      return square;
-    }
-  }
-  return null;
-};
