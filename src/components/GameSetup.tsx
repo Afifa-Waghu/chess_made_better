@@ -97,7 +97,7 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
                 value={whitePlayer.name}
                 onChange={(e) => setWhitePlayer(prev => ({ ...prev, name: e.target.value }))}
                 className="w-full px-4 py-2 border-2 border-pink-200 rounded-xl focus:border-pink-400 focus:outline-none bg-white/80"
-                placeholder="Enter your cute name..."
+                placeholder="Enter your name..."
               />
             </div>
           </div>
@@ -115,7 +115,7 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
                 value={blackPlayer.name}
                 onChange={(e) => setBlackPlayer(prev => ({ ...prev, name: e.target.value }))}
                 className="w-full px-4 py-2 border-2 border-purple-200 rounded-xl focus:border-purple-400 focus:outline-none bg-white/80"
-                placeholder="Enter your cute name..."
+                placeholder="Enter your name..."
               />
             </div>
           </div>
@@ -195,7 +195,7 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
-            ✨ Start Magical Chess Game ✨
+            ✨ Start Chess Game ✨
           </button>
         </div>
       </div>
