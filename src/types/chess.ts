@@ -25,6 +25,7 @@ export interface GameState {
   currentPlayer: PieceColor;
   moves: Move[];
   gameStatus: 'setup' | 'playing' | 'ended';
+  gameMode: 'standard' | 'chess960' | 'joker';
   winner?: PieceColor;
   whiteTime: number;
   blackTime: number;

@@ -13,21 +13,28 @@ export const squareToString = (file: number, rank: number): Square => {
   return `${FILES[file]}${rank + 1}`;
 };
 
-export const getInitialBoard = (): Map<Square, ChessPiece> => {
+export const getInitialBoard = (gameMode: 'standard' | 'chess960' | 'joker' = 'joker'): Map<Square, ChessPiece> => {
   const board = new Map<Square, ChessPiece>();
   
-  // Create shuffled back row pieces (excluding king)
-  const backRowPieces: PieceType[] = ['rook', 'knight', 'bishop', 'queen', 'bishop', 'knight', 'rook'];
-  const shuffledPieces = [...backRowPieces].sort(() => Math.random() - 0.5);
-  
-  // Place king in the middle somewhere
-  const kingPosition = Math.floor(Math.random() * 8);
-  const finalBackRow = [...shuffledPieces];
-  finalBackRow.splice(kingPosition, 0, 'king');
-  
-  // Remove one piece to make room for king
-  if (finalBackRow.length > 8) {
-    finalBackRow.pop();
+  let finalBackRow: PieceType[];
+
+  if (gameMode === 'standard') {
+    // Standard chess setup
+    finalBackRow = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+  } else {
+    // Chess 960 or Joker variant - randomized setup
+    const backRowPieces: PieceType[] = ['rook', 'knight', 'bishop', 'queen', 'bishop', 'knight', 'rook'];
+    const shuffledPieces = [...backRowPieces].sort(() => Math.random() - 0.5);
+    
+    // Place king in the middle somewhere
+    const kingPosition = Math.floor(Math.random() * 8);
+    finalBackRow = [...shuffledPieces];
+    finalBackRow.splice(kingPosition, 0, 'king');
+    
+    // Remove one piece to make room for king
+    if (finalBackRow.length > 8) {
+      finalBackRow.pop();
+    }
   }
   
   // Set up white pieces (rank 1)

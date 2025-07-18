@@ -5,9 +5,11 @@ import { Heart, Sparkles, Crown } from 'lucide-react';
 
 interface GameSetupProps {
   onStartGame: (whitePlayer: PlayerInfo, blackPlayer: PlayerInfo, timeControl: TimeControl, globalTheme: string) => void;
+  gameMode: 'standard' | 'chess960' | 'joker';
+  onBack: () => void;
 }
 
-export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame }) => {
+export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onBack }) => {
   const [whitePlayer, setWhitePlayer] = useState<PlayerInfo>({
     name: '',
     color: 'white',
@@ -37,16 +39,48 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame }) => {
     setTimeControl({ minutes, seconds: 0 });
   };
 
+  const getGameModeTitle = () => {
+    switch (gameMode) {
+      case 'standard':
+        return 'Standard Chess';
+      case 'chess960':
+        return 'Chess 960';
+      case 'joker':
+        return 'Joker Variant';
+      default:
+        return 'Chess Made Better';
+    }
+  };
+
+  const getGameModeDescription = () => {
+    switch (gameMode) {
+      case 'standard':
+        return '♔ Classic chess with traditional setup';
+      case 'chess960':
+        return '🔀 Fischer Random with shuffled back row';
+      case 'joker':
+        return '💀 Special variant with secret joker pawns';
+      default:
+        return '✨ Cute • Retro • Magical ✨';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center p-4">
       <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 max-w-2xl w-full shadow-2xl border-4 border-pink-200">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-pink-600 mb-2 flex items-center justify-center gap-2">
             <Crown className="text-pink-500" />
-            Chess Made Better
+            {getGameModeTitle()}
             <Sparkles className="text-pink-500" />
           </h1>
-          <p className="text-pink-400 text-lg">✨ Cute • Retro • Magical ✨</p>
+          <p className="text-pink-400 text-lg">{getGameModeDescription()}</p>
+          <button
+            onClick={onBack}
+            className="mt-2 text-pink-500 hover:text-pink-700 text-sm underline"
+          >
+            ← Back to Game Mode Selection
+          </button>
         </div>
 
         <div className="space-y-6">

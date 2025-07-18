@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { GameModeSelection } from './components/GameModeSelection';
 import { GameSetup } from './components/GameSetup';
 import { ChessBoard } from './components/ChessBoard';
 import { HelpModal } from './components/HelpModal';
@@ -48,6 +49,7 @@ function App() {
   const [showGameEnd, setShowGameEnd] = useState(false);
   const [showSaveGame, setShowSaveGame] = useState(false);
   const [globalTheme, setGlobalTheme] = useState('Princess Pink');
+  const [gameMode, setGameMode] = useState<'standard' | 'chess960' | 'joker' | null>(null);
   const [confirmAction, setConfirmAction] = useState<{
     type: 'resign' | 'quit';
     player?: 'white' | 'black';
@@ -59,7 +61,7 @@ function App() {
 
   const handleStartGame = (whitePlayer: any, blackPlayer: any, timeControl: any, theme: string) => {
     setGlobalTheme(theme);
-    startGame(whitePlayer, blackPlayer, timeControl);
+    startGame(whitePlayer, blackPlayer, timeControl, gameMode || 'joker');
   };
 
   const handleQuitGame = () => {
@@ -104,8 +106,18 @@ function App() {
     }
   }, [gameState.gameStatus, showGameEnd]);
 
+  if (!gameMode) {
+    return <GameModeSelection onSelectMode={setGameMode} />;
+  }
+
   if (gameState.gameStatus === 'setup') {
-    return <GameSetup onStartGame={handleStartGame} />;
+    return (
+      <GameSetup 
+        onStartGame={handleStartGame} 
+        gameMode={gameMode}
+        onBack={() => setGameMode(null)}
+      />
+    );
   }
 
   const theme = getTheme(globalTheme);

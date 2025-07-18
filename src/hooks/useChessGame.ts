@@ -8,6 +8,7 @@ export const useChessGame = () => {
     currentPlayer: 'white',
     moves: [],
     gameStatus: 'setup',
+    gameMode: 'joker',
     whiteTime: 0,
     blackTime: 0,
     lastMoveTime: 0,
@@ -30,22 +31,24 @@ export const useChessGame = () => {
   const [invalidMoveSquare, setInvalidMoveSquare] = useState<Square | null>(null);
   const [drawOffer, setDrawOffer] = useState<PieceColor | null>(null);
 
-  const startGame = useCallback((whitePlayer: PlayerInfo, blackPlayer: PlayerInfo, timeControl: TimeControl) => {
-    const board = getInitialBoard();
-    const jokerPawns = selectJokerPawns(board);
+  const startGame = useCallback((whitePlayer: PlayerInfo, blackPlayer: PlayerInfo, timeControl: TimeControl, gameMode: 'standard' | 'chess960' | 'joker' = 'joker') => {
+    const board = getInitialBoard(gameMode);
+    const jokerPawns = gameMode === 'joker' ? selectJokerPawns(board) : { white: '', black: '' };
     
-    // Mark joker pawns
-    const whitePawn = board.get(jokerPawns.white);
-    const blackPawn = board.get(jokerPawns.black);
-    
-    if (whitePawn) {
-      whitePawn.isJoker = true;
-      board.set(jokerPawns.white, whitePawn);
-    }
-    
-    if (blackPawn) {
-      blackPawn.isJoker = true;
-      board.set(jokerPawns.black, blackPawn);
+    // Mark joker pawns only for joker variant
+    if (gameMode === 'joker') {
+      const whitePawn = board.get(jokerPawns.white);
+      const blackPawn = board.get(jokerPawns.black);
+      
+      if (whitePawn) {
+        whitePawn.isJoker = true;
+        board.set(jokerPawns.white, whitePawn);
+      }
+      
+      if (blackPawn) {
+        blackPawn.isJoker = true;
+        board.set(jokerPawns.black, blackPawn);
+      }
     }
 
     const totalTime = timeControl.minutes * 60 + timeControl.seconds;
@@ -55,6 +58,7 @@ export const useChessGame = () => {
       currentPlayer: 'white',
       moves: [],
       gameStatus: 'playing',
+      gameMode,
       whiteTime: totalTime,
       blackTime: totalTime,
       lastMoveTime: Date.now(),
@@ -188,8 +192,8 @@ export const useChessGame = () => {
       const newBoard = new Map(prev.board);
       const capturedPiece = newBoard.get(to);
       
-      // Check if capturing joker pawn (but not if it's promoted)
-      if (capturedPiece?.isJoker && capturedPiece.type === 'pawn') {
+      // Check if capturing joker pawn (but not if it's promoted) - only in joker variant
+      if (prev.gameMode === 'joker' && capturedPiece?.isJoker && capturedPiece.type === 'pawn') {
         if (gameTimer) clearInterval(gameTimer);
         playSound('checkmate');
         return {
