@@ -122,16 +122,11 @@ function App() {
 
   const theme = getTheme(globalTheme);
   const currentPlayerName = gameState.currentPlayer === 'white' ? players.white.name : players.black.name;
-  const isInCheck = gameState.board && (() => {
-    // Simple check detection for UI
-    const kingSquare = Array.from(gameState.board.entries()).find(
-      ([, piece]) => piece.type === 'king' && piece.color === gameState.currentPlayer
-    )?.[0];
-    return kingSquare && Array.from(gameState.board.entries()).some(
-      ([square, piece]) => piece.color !== gameState.currentPlayer && 
-      square !== kingSquare // Basic check - in real implementation would use proper logic
-    );
-  })();
+  
+  // Check if current player is in check
+  const isCurrentPlayerInCheck = gameState.board ? isInCheck(gameState.currentPlayer, gameState.board) : false;
+  const whiteKingInCheck = gameState.board ? isInCheck('white', gameState.board) : false;
+  const blackKingInCheck = gameState.board ? isInCheck('black', gameState.board) : false;
 
   return (
     <div 
@@ -259,7 +254,7 @@ function App() {
             theme={globalTheme}
             capturedPieces={gameState.capturedPieces}
             isTop={true}
-            isInCheck={gameState.currentPlayer === 'black' && isInCheck}
+            isInCheck={blackKingInCheck}
           />
 
           {/* Chess Board */}
@@ -274,6 +269,8 @@ function App() {
               showPossibleMoves={showPossibleMoves}
               possibleMoves={possibleMoves}
               invalidMoveSquare={invalidMoveSquare}
+              whiteKingInCheck={whiteKingInCheck}
+              blackKingInCheck={blackKingInCheck}
             />
           </div>
 
@@ -286,7 +283,7 @@ function App() {
             theme={globalTheme}
             capturedPieces={gameState.capturedPieces}
             isTop={false}
-            isInCheck={gameState.currentPlayer === 'white' && isInCheck}
+            isInCheck={whiteKingInCheck}
           />
         </div>
 
@@ -302,7 +299,7 @@ function App() {
             <p className="font-semibold text-sm sm:text-base" style={{ color: theme.text }}>
               {isPaused ? '⏸️ Game Paused' :
                gameState.gameStatus === 'playing' ? 
-                `${currentPlayerName}'s turn` :
+                `${currentPlayerName}'s turn${isCurrentPlayerInCheck ? ' (In Check!)' : ''}` :
                 'Game Over'
               }
             </p>

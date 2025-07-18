@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { GameState, ChessPiece, Move, Square, PieceColor, PlayerInfo, TimeControl, PieceType } from '../types/chess';
-import { getInitialBoard, selectJokerPawns, isValidMove, getTimeBonus, isCheckmate, isInCheck, isPawnPromotion, isStalemate, getPossibleMoves } from '../utils/chessLogic';
+import { getInitialBoard, selectJokerPawns, isValidMove, getTimeBonus, isCheckmate, isInCheck, isPawnPromotion, isStalemate, getPossibleMoves, findKing } from '../utils/chessLogic';
 
 export const useChessGame = () => {
   const [gameState, setGameState] = useState<GameState>({
@@ -249,12 +249,13 @@ export const useChessGame = () => {
       let endReason = prev.endReason;
       
       if (isInCheck(nextPlayer, newBoard)) {
-        playSound('check');
         if (isCheckmate(nextPlayer, newBoard)) {
           gameStatus = 'ended';
           winner = prev.currentPlayer;
           endReason = 'checkmate';
           playSound('checkmate');
+        } else {
+          playSound('check');
         }
       } else if (isStalemate(nextPlayer, newBoard)) {
         gameStatus = 'ended';
