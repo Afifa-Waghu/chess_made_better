@@ -195,7 +195,7 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
-            ✨ Start Chess Game ✨
+            ✨ Start ✨
           </button>
         </div>
       </div>
