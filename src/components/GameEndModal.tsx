@@ -52,27 +52,27 @@ export const GameEndModal: React.FC<GameEndModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center relative overflow-hidden">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 max-w-md w-full mx-4 text-center relative overflow-hidden">
         {/* Confetti Effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-purple-100 animate-pulse" />
         
         <div className="relative z-10">
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             {getIcon()}
           </div>
           
-          <h2 className="text-3xl font-bold text-purple-600 mb-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-purple-600 mb-4">
             {isDraw ? 'Draw!' : 'Game Over!'}
           </h2>
           
-          <p className="text-lg text-purple-700 mb-6">
+          <p className="text-base sm:text-lg text-purple-700 mb-4 sm:mb-6">
             {getWinMessage()}
           </p>
           
           <div className="space-y-3">
             <button
               onClick={onNewGame}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-2xl font-semibold hover:from-pink-600 hover:to-purple-600 transition-all duration-200 shadow-lg"
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-2 sm:py-3 rounded-xl sm:rounded-2xl font-semibold hover:from-pink-600 hover:to-purple-600 transition-all duration-200 shadow-lg text-sm sm:text-base"
             >
               🎮 Play Again
             </button>

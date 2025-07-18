@@ -67,17 +67,17 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center p-4">
-      <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 max-w-2xl w-full shadow-2xl border-4 border-pink-200">
+      <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-4 sm:p-6 lg:p-8 max-w-2xl w-full shadow-2xl border-4 border-pink-200">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-pink-600 mb-2 flex items-center justify-center gap-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-pink-600 mb-2 flex items-center justify-center gap-2 flex-wrap">
             <Crown className="text-pink-500" />
             {getGameModeTitle()}
             <Sparkles className="text-pink-500" />
           </h1>
-          <p className="text-pink-400 text-lg">{getGameModeDescription()}</p>
+          <p className="text-pink-400 text-base sm:text-lg">{getGameModeDescription()}</p>
           <button
             onClick={onBack}
-            className="mt-2 text-pink-500 hover:text-pink-700 text-sm underline"
+            className="mt-2 text-pink-500 hover:text-pink-700 text-xs sm:text-sm underline"
           >
             ← Back to Game Mode Selection
           </button>
@@ -85,8 +85,8 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
 
         <div className="space-y-6">
           {/* Player 1 Setup */}
-          <div className="bg-pink-50 rounded-2xl p-6 border-2 border-pink-200">
-            <h3 className="text-xl font-semibold text-pink-700 mb-4 flex items-center gap-2">
+          <div className="bg-pink-50 rounded-2xl p-4 sm:p-6 border-2 border-pink-200">
+            <h3 className="text-lg sm:text-xl font-semibold text-pink-700 mb-4 flex items-center gap-2">
               <Heart className="text-pink-500" size={20} />
               Player 1 (White)
             </h3>
@@ -96,15 +96,15 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
                 type="text"
                 value={whitePlayer.name}
                 onChange={(e) => setWhitePlayer(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-4 py-2 border-2 border-pink-200 rounded-xl focus:border-pink-400 focus:outline-none bg-white/80"
+                className="w-full px-3 sm:px-4 py-2 border-2 border-pink-200 rounded-xl focus:border-pink-400 focus:outline-none bg-white/80 text-sm sm:text-base"
                 placeholder="Enter your name..."
               />
             </div>
           </div>
 
           {/* Player 2 Setup */}
-          <div className="bg-purple-50 rounded-2xl p-6 border-2 border-purple-200">
-            <h3 className="text-xl font-semibold text-purple-700 mb-4 flex items-center gap-2">
+          <div className="bg-purple-50 rounded-2xl p-4 sm:p-6 border-2 border-purple-200">
+            <h3 className="text-lg sm:text-xl font-semibold text-purple-700 mb-4 flex items-center gap-2">
               <Heart className="text-purple-500" size={20} />
               Player 2 (Black)
             </h3>
@@ -114,18 +114,18 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
                 type="text"
                 value={blackPlayer.name}
                 onChange={(e) => setBlackPlayer(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-4 py-2 border-2 border-purple-200 rounded-xl focus:border-purple-400 focus:outline-none bg-white/80"
+                className="w-full px-3 sm:px-4 py-2 border-2 border-purple-200 rounded-xl focus:border-purple-400 focus:outline-none bg-white/80 text-sm sm:text-base"
                 placeholder="Enter your name..."
               />
             </div>
           </div>
 
           {/* Time Control */}
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-6 border-2 border-pink-200">
-            <h3 className="text-xl font-semibold text-pink-700 mb-4">Time Control</h3>
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-4 sm:p-6 border-2 border-pink-200">
+            <h3 className="text-lg sm:text-xl font-semibold text-pink-700 mb-4">Time Control</h3>
             <div className="space-y-4">
               <div className="text-center">
-                <span className="text-2xl font-bold text-pink-600">{timeControl.minutes} minute{timeControl.minutes !== 1 ? 's' : ''}</span>
+                <span className="text-xl sm:text-2xl font-bold text-pink-600">{timeControl.minutes} minute{timeControl.minutes !== 1 ? 's' : ''}</span>
               </div>
               <div className="relative">
                 <input
@@ -149,15 +149,15 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
           </div>
 
           {/* Color Theme Selection */}
-          <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-6 border-2 border-pink-200">
-            <h3 className="text-xl font-semibold text-pink-700 mb-4">Choose Color Theme</h3>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-4 sm:p-6 border-2 border-pink-200">
+            <h3 className="text-lg sm:text-xl font-semibold text-pink-700 mb-4">Choose Color Theme</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {themes.map(theme => (
                 <button
                   key={theme.name}
                   onClick={() => setGlobalTheme(theme.name)}
                   className={`
-                    p-4 rounded-xl border-2 transition-all duration-200 text-left
+                    p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 text-left
                     ${globalTheme === theme.name ? 'border-pink-500 shadow-lg scale-105' : 'border-gray-200 hover:border-pink-300'}
                   `}
                   style={{
@@ -166,11 +166,11 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
                 >
                   <div className="flex items-center gap-3">
                     <div 
-                      className="w-8 h-8 rounded-full border-2 border-white shadow-md"
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 border-white shadow-md flex-shrink-0"
                       style={{ backgroundColor: theme.primary }}
                     />
                     <div>
-                      <div className="font-semibold" style={{ color: theme.text }}>
+                      <div className="font-semibold text-sm sm:text-base" style={{ color: theme.text }}>
                         {theme.name}
                       </div>
                       <div className="flex gap-1 mt-1">
@@ -193,7 +193,7 @@ export const GameSetup: React.FC<GameSetupProps> = ({ onStartGame, gameMode, onB
               whitePlayer.name && blackPlayer.name
                 ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600 shadow-lg hover:shadow-xl transform hover:scale-105'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+            } text-lg sm:text-xl`}
           >
             ✨ Start ✨
           </button>

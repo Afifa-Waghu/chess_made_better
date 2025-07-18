@@ -85,13 +85,13 @@ export const GameModeSelection: React.FC<GameModeSelectionProps> = ({ onSelectMo
             return (
               <div
                 key={mode.id}
-                className={`bg-gradient-to-br ${colors.bg} rounded-2xl p-6 border-2 ${colors.border} transition-all duration-200 hover:scale-105 hover:shadow-lg`}
+                className={`bg-gradient-to-br ${colors.bg} rounded-2xl p-4 sm:p-6 border-2 ${colors.border} transition-all duration-200 hover:scale-105 hover:shadow-lg`}
               >
                 <div className="text-center mb-4">
                   <div className="mb-3">
                     {mode.icon}
                   </div>
-                  <h3 className={`text-2xl font-bold ${colors.text} mb-2`}>
+                  <h3 className={`text-xl sm:text-2xl font-bold ${colors.text} mb-2`}>
                     {mode.title}
                   </h3>
                   <p className={`${colors.text} opacity-80 text-sm mb-4`}>
@@ -110,7 +110,7 @@ export const GameModeSelection: React.FC<GameModeSelectionProps> = ({ onSelectMo
 
                 <button
                   onClick={() => onSelectMode(mode.id)}
-                  className={`w-full py-3 rounded-2xl font-semibold text-white transition-all duration-200 shadow-lg bg-gradient-to-r ${colors.button} transform hover:scale-105`}
+                  className={`w-full py-2 sm:py-3 rounded-2xl font-semibold text-white transition-all duration-200 shadow-lg bg-gradient-to-r ${colors.button} transform hover:scale-105 text-sm sm:text-base`}
                 >
                   Play {mode.title}
                 </button>
@@ -120,7 +120,7 @@ export const GameModeSelection: React.FC<GameModeSelectionProps> = ({ onSelectMo
         </div>
 
         <div className="mt-8 text-center">
-          <div className="bg-yellow-50 rounded-2xl p-4 border-2 border-yellow-200 inline-block">
+          <div className="bg-yellow-50 rounded-2xl p-3 sm:p-4 border-2 border-yellow-200 inline-block max-w-full">
             <p className="text-yellow-800 text-sm">
               <strong>New to Chess Made Better?</strong> Try our special Joker Variant for a unique twist on the classic game!
             </p>

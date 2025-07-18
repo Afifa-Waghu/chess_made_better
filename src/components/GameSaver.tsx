@@ -52,14 +52,14 @@ export const GameSaver: React.FC<GameSaverProps> = ({
     return (
       <button
         onClick={openModal}
-        className="text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
+        className="text-white px-2 sm:px-3 lg:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
         style={{ 
           backgroundColor: '#8b5cf6',
           boxShadow: '0 4px 12px #8b5cf640'
         }}
       >
-        <Save size={16} />
-        Save/Load
+        <Save size={14} className="sm:w-4 sm:h-4" />
+        <span className="hidden sm:inline">Save/Load</span>
       </button>
     );
   }

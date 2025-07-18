@@ -91,7 +91,7 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
       
       {/* Piece Symbol */}
       <div className={`
-        text-5xl select-none relative z-10 font-bold
+        text-2xl sm:text-3xl md:text-4xl lg:text-5xl select-none relative z-10 font-bold
         ${isSelected ? 'animate-bounce' : ''}
         ${showJokerEffect ? 'animate-pulse' : ''}
         ${isInvalid ? 'animate-shake' : ''}
@@ -105,7 +105,7 @@ export const ChessPiece: React.FC<ChessPieceProps> = ({
       
       {/* Joker Warning */}
       {showJokerEffect && (
-        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-bounce z-20">
+        <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-xs rounded-full w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 flex items-center justify-center animate-bounce z-20 text-xs">
           ⚠
         </div>
       )}

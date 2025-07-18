@@ -204,11 +204,13 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       
       {/* Board */}
       <div 
-        className="grid grid-cols-8 gap-0 border-4 rounded-2xl overflow-hidden shadow-2xl relative"
+        className="grid grid-cols-8 gap-0 border-2 sm:border-4 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl relative mx-auto"
         style={{ 
           borderColor: theme.border,
-          width: '600px',
-          height: '600px'
+          width: 'min(90vw, 600px)',
+          height: 'min(90vw, 600px)',
+          maxWidth: '600px',
+          maxHeight: '600px'
         }}
       >
         {RANKS.slice().reverse().map((rank, rankIndex) =>
@@ -229,7 +231,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop(square)}
                 className={`
-                  w-[75px] h-[75px] flex items-center justify-center cursor-pointer
+                  aspect-square flex items-center justify-center cursor-pointer
                   transition-all duration-200 relative
                   ${isSelected ? 'ring-4 ring-yellow-400 ring-inset z-10' : ''}
                   ${isDragOver ? 'ring-4 ring-green-400 ring-inset' : ''}
@@ -244,7 +246,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
                 {isPossibleMove && showPossibleMoves && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div 
-                      className="w-4 h-4 rounded-full animate-pulse"
+                      className="w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 rounded-full animate-pulse"
                       style={{ backgroundColor: theme.accent }}
                     />
                   </div>
@@ -272,16 +274,16 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       {/* File Labels (bottom) */}
       <div className="flex justify-center mt-2">
         {FILES.map((file) => (
-          <div key={file} className="w-[75px] text-center font-bold" style={{ color: theme.text }}>
+          <div key={file} className="flex-1 text-center font-bold text-xs sm:text-sm" style={{ color: theme.text, maxWidth: 'calc(min(90vw, 600px) / 8)' }}>
             {file}
           </div>
         ))}
       </div>
       
       {/* Rank Labels (left) */}
-      <div className="absolute left-0 top-0 h-full flex flex-col-reverse justify-center -ml-8">
+      <div className="absolute left-0 top-0 h-full flex flex-col-reverse justify-center -ml-4 sm:-ml-6 md:-ml-8">
         {RANKS.map((rank) => (
-          <div key={rank} className="h-[75px] flex items-center justify-center font-bold" style={{ color: theme.text }}>
+          <div key={rank} className="flex-1 flex items-center justify-center font-bold text-xs sm:text-sm" style={{ color: theme.text, height: 'calc(min(90vw, 600px) / 8)' }}>
             {rank}
           </div>
         ))}

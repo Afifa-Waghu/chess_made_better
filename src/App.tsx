@@ -135,74 +135,74 @@ function App() {
 
   return (
     <div 
-      className="min-h-screen p-4 transition-all duration-500"
+      className="min-h-screen p-2 sm:p-4 transition-all duration-500"
       style={{ 
         background: `linear-gradient(135deg, ${theme.background} 0%, ${theme.secondary} 100%)` 
       }}
     >
       <div 
-        className="max-w-6xl mx-auto"
+        className="max-w-7xl mx-auto"
         style={{ 
           background: `linear-gradient(135deg, ${theme.background}80 0%, ${theme.secondary}80 100%)`,
-          borderRadius: '2rem',
-          padding: '2rem',
+          borderRadius: '1rem',
+          padding: '1rem',
           backdropFilter: 'blur(10px)',
           border: `2px solid ${theme.border}40`
         }}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-4">
           <h1 
-            className="text-3xl font-bold flex items-center gap-2"
+            className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center gap-2 text-center"
             style={{ color: theme.primary }}
           >
             ✨ Chess Made Better ✨
           </h1>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-1 sm:gap-2 justify-center">
             {/* Undo/Redo */}
             <button
               onClick={undoMove}
               disabled={gameState.moves.length === 0}
-              className="text-white px-3 py-2 rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="text-white px-2 sm:px-3 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-colors flex items-center gap-1 sm:gap-2 disabled:opacity-50 text-xs sm:text-sm"
               style={{ 
                 backgroundColor: theme.accent,
                 boxShadow: `0 4px 12px ${theme.accent}40`
               }}
             >
-              <RotateCcw size={16} />
+              <RotateCcw size={14} className="sm:w-4 sm:h-4" />
             </button>
             <button
               onClick={redoMove}
               disabled={true} // Simplified for now
-              className="text-white px-3 py-2 rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="text-white px-2 sm:px-3 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-colors flex items-center gap-1 sm:gap-2 disabled:opacity-50 text-xs sm:text-sm"
               style={{ 
                 backgroundColor: theme.accent,
                 boxShadow: `0 4px 12px ${theme.accent}40`
               }}
             >
-              <RotateRight size={16} />
+              <RotateRight size={14} className="sm:w-4 sm:h-4" />
             </button>
 
             {/* Resign/Draw */}
             <button
               onClick={() => handleResign(gameState.currentPlayer)}
-              className="text-white px-3 py-2 rounded-xl transition-colors flex items-center gap-2"
+              className="text-white px-2 sm:px-3 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
               style={{ 
                 backgroundColor: '#ef4444',
                 boxShadow: '0 4px 12px #ef444440'
               }}
             >
-              <Flag size={16} />
+              <Flag size={14} className="sm:w-4 sm:h-4" />
             </button>
             <button
               onClick={() => offerDraw(gameState.currentPlayer)}
-              className="text-white px-3 py-2 rounded-xl transition-colors flex items-center gap-2"
+              className="text-white px-2 sm:px-3 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
               style={{ 
                 backgroundColor: '#f59e0b',
                 boxShadow: '0 4px 12px #f59e0b40'
               }}
             >
-              <HandHeart size={16} />
+              <HandHeart size={14} className="sm:w-4 sm:h-4" />
             </button>
 
             <GameSaver
@@ -214,42 +214,42 @@ function App() {
             />
             <button
               onClick={() => { setShowSettings(true); handleModalOpen(); }}
-              className="text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
+              className="text-white px-2 sm:px-3 lg:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
               style={{ 
                 backgroundColor: theme.accent,
                 boxShadow: `0 4px 12px ${theme.accent}40`
               }}
             >
-              <Settings size={16} />
-              Settings
+              <Settings size={14} className="sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Settings</span>
             </button>
             <button
               onClick={() => { setShowHelp(true); handleModalOpen(); }}
-              className="text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
+              className="text-white px-2 sm:px-3 lg:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
               style={{ 
                 backgroundColor: theme.accent,
                 boxShadow: `0 4px 12px ${theme.accent}40`
               }}
             >
-              <HelpCircle size={16} />
-              Help
+              <HelpCircle size={14} className="sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Help</span>
             </button>
             <button
               onClick={handleQuitGame}
-              className="text-white px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
+              className="text-white px-2 sm:px-3 lg:px-4 py-1 sm:py-2 rounded-lg sm:rounded-xl transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
               style={{ 
                 backgroundColor: theme.primary,
                 boxShadow: `0 4px 12px ${theme.primary}40`
               }}
             >
-              <Home size={16} />
-              New Game
+              <Home size={14} className="sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">New Game</span>
             </button>
           </div>
         </div>
 
         {/* Game Layout */}
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-2 sm:gap-4">
           {/* Top Player (Black) */}
           <PlayerInfo
             color="black"
@@ -263,7 +263,7 @@ function App() {
           />
 
           {/* Chess Board */}
-          <div className="flex justify-center">
+          <div className="flex justify-center w-full">
             <ChessBoard
               gameState={gameState}
               selectedSquare={selectedSquare}
@@ -291,15 +291,15 @@ function App() {
         </div>
 
         {/* Game Status */}
-        <div className="mt-6 text-center">
+        <div className="mt-4 sm:mt-6 text-center">
           <div 
-            className="backdrop-blur-sm rounded-2xl p-4 border-2 inline-block"
+            className="backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 border-2 inline-block"
             style={{ 
               backgroundColor: `${theme.background}80`,
               borderColor: theme.border
             }}
           >
-            <p className="font-semibold" style={{ color: theme.text }}>
+            <p className="font-semibold text-sm sm:text-base" style={{ color: theme.text }}>
               {isPaused ? '⏸️ Game Paused' :
                gameState.gameStatus === 'playing' ? 
                 `${currentPlayerName}'s turn` :
